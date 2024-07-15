@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Lucid.GoQuest
@@ -8,6 +9,8 @@ namespace Lucid.GoQuest
 	{
 		private static GoQuest2030 instance = null;
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
+		[JsonProperty] private List<Team> teams;
+		[JsonProperty] private List<Game> games;
 		private GoQuest2030() 
 		{
 			Console.WriteLine(JsonConvert.SerializeObject(this));

@@ -1,1 +1,18 @@
-{}
+{
+	"teams": [
+		{
+			"name": "The Winners"
+		},
+		{
+			"name": "The Losers"
+		}
+	],
+	"games": [
+		{
+			"name": "Minesweeper"
+		},
+		{
+			"name": "Submarine"
+		}
+	]
+}
