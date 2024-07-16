@@ -1,18 +1,47 @@
 {
-	"teams": [
-		{
-			"name": "The Winners"
-		},
-		{
-			"name": "The Losers"
-		}
-	],
-	"games": [
-		{
-			"name": "Minesweeper"
-		},
-		{
-			"name": "Submarine"
-		}
-	]
+	"teams": {
+		"list": [
+			
+		]
+	},
+	"games": {
+		"list": [
+			{
+				"name": "Minesweeper"
+			},
+			{
+				"name": "Submarine"
+			},
+			{
+				"name": "Frigate"
+			},
+			{
+				"name": "Destroyer"
+			},
+			{
+				"name": "Aircraft Carrier"
+			},
+			{
+				"name": "E-Boat"
+			},
+			{
+				"name": "Corvette"
+			},
+			{
+				"name": "Amphibious"
+			},
+			{
+				"name": "Torpedo Ram"
+			},
+			{
+				"name": "Cruiser"
+			},
+			{
+				"name": "Supply Ship"
+			},
+			{
+				"name": "Milch Cow"
+			}
+		]
+	}
 }
