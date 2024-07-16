@@ -2,19 +2,31 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Lucid.GoQuest
 {
+	public class SafeList<T>
+	{
+		[JsonProperty] private List<T> list;
+		[JsonIgnore] public int Count { get { return list.Count; } }
+		public SafeList() { list = new List<T>(); }
+		public void Add(T elem) { lock (this) list.Add(elem); }
+		public bool Contains(T elem) { lock (this) return list.Contains(elem); }
+		public bool Remove(T elem) { lock (this) return list.Remove(elem); }
+		public IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
+		public T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
+	}
 	public class GoQuest2030
 	{
+		private static readonly byte MAJOR_REV = 0, MINOR_REV = 0, RELEASE_REV = 1;
+		private static readonly string REV_SUFFIX = "";
 		private static GoQuest2030 instance = null;
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
-		[JsonProperty] private List<Team> teams;
-		[JsonProperty] private List<Game> games;
-		private GoQuest2030() 
-		{
-			Console.WriteLine(JsonConvert.SerializeObject(this));
-		}
+		[JsonProperty] private SafeList<Team> teams;
+		[JsonProperty] internal SafeList<Game> games;
+		public static TeamSequencer Sequencer = new TeamSequencer();
+		private GoQuest2030() { }
 		public GoQuest2030 detokenise()
 		{
 			return this;
@@ -31,7 +43,6 @@ namespace Lucid.GoQuest
 		}
 		private void serialise()
 		{
-			Console.Write("Saving ... ");
 			tokenise();
 			var s = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
 			if (File.Exists(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
@@ -41,8 +52,11 @@ namespace Lucid.GoQuest
 			}
 			using (var file = File.CreateText(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
 				file.Write(s);
-			Console.WriteLine("done.");
 			detokenise();
+		}
+		public static void print()
+		{
+			Console.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
 		}
 	}
 }
