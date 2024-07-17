@@ -16,6 +16,8 @@ namespace Lucid.GoQuest
 		public bool Remove(T elem) { lock (this) return list.Remove(elem); }
 		public IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
 		public T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
+
+		public void print() { return; lock (this) foreach (var v in list) Console.WriteLine(v); }
 	}
 	public class GoQuest2030
 	{

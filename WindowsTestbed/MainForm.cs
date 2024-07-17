@@ -5,8 +5,6 @@ namespace Lucid.GoQuest
 		public MainForm()
 		{
 			InitializeComponent();
-			GoQuest2030.print();
-			GoQuest2030.Sequencer.Start();
 		}
 	}
 }
