@@ -6,18 +6,32 @@ using System.Linq;
 
 namespace Lucid.GoQuest
 {
-	public class SafeList<T>
+	internal class SafeList<T>
 	{
-		[JsonProperty] private List<T> list;
+		[JsonProperty] protected List<T> list;
 		[JsonIgnore] public int Count { get { return list.Count; } }
-		public SafeList() { list = new List<T>(); }
-		public void Add(T elem) { lock (this) list.Add(elem); }
-		public bool Contains(T elem) { lock (this) return list.Contains(elem); }
-		public bool Remove(T elem) { lock (this) return list.Remove(elem); }
-		public IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
-		public T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
+		internal SafeList() { list = new List<T>(); }
+		internal void Add(T elem) { lock (this) list.Add(elem); }
+		internal bool Contains(T elem) { lock (this) return list.Contains(elem); }
+		internal bool Remove(T elem) { lock (this) return list.Remove(elem); }
+		internal IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
+		internal T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
 
-		public void print() { return; lock (this) foreach (var v in list) Console.WriteLine(v); }
+		internal void print() { return; lock (this) foreach (var v in list) Console.WriteLine(v); }
+	}
+	internal class SafeGamesList:SafeList<Game>
+	{
+		internal Game ClaimFirstEmpty(List<Game> played)
+		{
+			lock (list)
+			{
+				var empties = Where(x => x.State == State.EMPTY).ToList();
+				var intersect = empties.Intersect(played);
+				empties.RemoveAll(x => intersect.Contains(x));
+				if (empties.Any()) { empties.First().Claim(); return empties.First(); }
+				return null;
+			}
+		}
 	}
 	public class GoQuest2030
 	{
@@ -26,10 +40,10 @@ namespace Lucid.GoQuest
 		private static GoQuest2030 instance = null;
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
 		[JsonProperty] private SafeList<Team> teams;
-		[JsonProperty] internal SafeList<Game> games;
+		[JsonProperty] internal SafeGamesList games;
 		public static TeamSequencer Sequencer = new TeamSequencer();
 		private GoQuest2030() { }
-		public GoQuest2030 detokenise()
+		private GoQuest2030 detokenise()
 		{
 			return this;
 		}
