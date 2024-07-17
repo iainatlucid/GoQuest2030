@@ -15,16 +15,10 @@ namespace Lucid.GoQuest
 		{
 			gameOver = callback;
 			Console.WriteLine(">>>>>>>>>>{0} started playing {1}...", team, name);
-			//new Timer((o) =>
-			//new Thread((o) =>
-			{
-				//Thread.Sleep(1000);
-				Console.WriteLine("-----------------------{0} finished {1}, played {2}.", team, name, team.Played);
-				State = State.EMPTY;
-				gameOver(null);
-			}
-			//, null, 1000, Timeout.Infinite);
-			//GoQuest2030.Instance.games.print();
+			Thread.Sleep(1000);	//playing...
+			Console.WriteLine("-----------------------{0} finished {1}, played {2}.", team, name, team.Played);
+			State = State.EMPTY;
+			gameOver(null);
 		}
 	}
 }

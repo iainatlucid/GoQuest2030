@@ -7,40 +7,94 @@
 	"games": {
 		"list": [
 			{
-				"name": "Minesweeper"
+				"name": "Monty On The Run"
 			},
 			{
-				"name": "Submarine"
+				"name": "Wizball"
 			},
 			{
-				"name": "Frigate"
+				"name": "William Wobbler"
 			},
 			{
-				"name": "Destroyer"
+				"name": "Nemesis The Warlock"
 			},
 			{
-				"name": "Aircraft Carrier"
+				"name": "Thing On A Spring"
 			},
 			{
-				"name": "E-Boat"
+				"name": "Zoids"
 			},
 			{
-				"name": "Corvette"
+				"name": "Suicide Express"
 			},
 			{
-				"name": "Amphibious"
+				"name": "Kikstart"
 			},
 			{
-				"name": "Torpedo Ram"
+				"name": "Commando"
 			},
 			{
-				"name": "Cruiser"
+				"name": "Master Of Magic"
 			},
 			{
-				"name": "Supply Ship"
+				"name": "Gauntlet"
 			},
 			{
-				"name": "Milch Cow"
+				"name": "The Last V8"
+			},
+			{
+				"name": "Atic Atac"
+			},
+			{
+				"name": "Underwurlde"
+			},
+			{
+				"name": "Jetpac"
+			},
+			{
+				"name": "Paradroid"
+			},
+			{
+				"name": "Sabre Wulf"
+			},
+			{
+				"name": "The Hobbit"
+			},
+			{
+				"name": "Lunar Jetman"
+			},
+			{
+				"name": "Manic Miner"
+			},
+			{
+				"name": "Jetset Willy"
+			},
+			{
+				"name": "Bugsplat"
+			},
+			{
+				"name": "Game Of Life"
+			},
+			{
+				"name": "Adventure A: Planet Of Death"
+			},
+			{
+				"name": "Fungaloids"
+			},
+			{
+				"name": "Penetrator"
+			},
+			{
+				"name": "Tranz-Am"
+			},
+			{
+				"name": "Cookie"
+			},
+			{
+				"name": "Schooldaze"
+			},
+			{
+				"name": "Dracula"
 			}
 		]
 	}
