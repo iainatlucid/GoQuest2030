@@ -8,7 +8,7 @@ namespace Lucid.GoQuest
 {
 	public class TeamSequencer
 	{
-		[JsonProperty] private readonly int TOTAL_TEAMS = 1000;
+		[JsonProperty] private readonly int TOTAL_TEAMS = 10;
 		private Thread start;
 		public void Start() { start = new Thread(run); start.Start(); }
 		private void run()

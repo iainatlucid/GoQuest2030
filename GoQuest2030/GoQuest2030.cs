@@ -19,7 +19,7 @@ namespace Lucid.GoQuest
 
 		internal void print() { return; lock (this) foreach (var v in list) Console.WriteLine(v); }
 	}
-	internal class SafeGamesList:SafeList<Game>
+	internal class SafeGamesList : SafeList<Game>
 	{
 		internal Game ClaimFirstEmpty(List<Game> played)
 		{
@@ -42,6 +42,7 @@ namespace Lucid.GoQuest
 		[JsonProperty] private SafeList<Team> teams;
 		[JsonProperty] internal SafeGamesList games;
 		public static TeamSequencer Sequencer = new TeamSequencer();
+		private GamesInterface gif = new GamesInterface();
 		private GoQuest2030() { }
 		private GoQuest2030 detokenise()
 		{

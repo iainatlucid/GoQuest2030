@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Base.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="GamesInterface.cs" />
     <Compile Include="GoQuest2030.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Team.cs" />
