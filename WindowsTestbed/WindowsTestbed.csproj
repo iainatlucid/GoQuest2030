@@ -12,6 +12,9 @@
     <Reference Include="GoQuest2030">
       <HintPath>..\GoQuest2030\bin\Debug\GoQuest2030.dll</HintPath>
     </Reference>
+    <Reference Include="GoQuestJsonSender">
+      <HintPath>..\GoQuestJsonSender\bin\Debug\net6.0\GoQuestJsonSender.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

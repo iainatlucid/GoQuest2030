@@ -18,7 +18,7 @@ namespace Lucid.GoQuest
 			//GoQuest2030.Sequencer.Start();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(/*new MainForm()*/);
+			Application.Run(new MainForm());
 		}
 		public static void ConsoleWindow(bool b)
 		{

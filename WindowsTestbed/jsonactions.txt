@@ -1,1 +1,3 @@
-API/Menu/Jesus=Mary
+Jesus/Built/My/Hotrod=gameName
+Jesus/Trashed/My/Hotrod=gameStart
+Jesus/Ate/My/Hotrod=superQuest

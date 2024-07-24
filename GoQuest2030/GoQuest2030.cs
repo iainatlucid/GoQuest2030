@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,7 +54,7 @@ namespace Lucid.GoQuest
 			string s;
 			using (var file = new StreamReader(new FileStream(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json", FileMode.Open)))
 				s = file.ReadToEnd();
-			return JsonConvert.DeserializeObject<GoQuest2030>(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }).detokenise();
+			return JsonConvert.DeserializeObject<GoQuest2030>(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }).detokenise().init();
 		}
 		private void tokenise()
 		{
@@ -74,6 +75,30 @@ namespace Lucid.GoQuest
 		public static void print()
 		{
 			Console.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
+		}
+		private GoQuest2030 init()
+		{
+			gif.AddAction(gameStart);
+			gif.AddAction(superQuest);
+			gif.AddAction(gameName);
+			gif.AddAction(test);
+			return this;
+		}
+		private void gameStart(JToken token)
+		{
+			Console.WriteLine("GameStarted {0}", token.ToString());
+		}
+		private void superQuest(JToken token)
+		{
+			Console.WriteLine("SuperQuest {0}", token.ToString());
+		}
+		private void gameName(JToken token)
+		{
+			Console.WriteLine("GameName {0}", token.ToString());
+		}
+		private void test(JToken token)
+		{
+			Console.WriteLine("test {0}", token.ToString());
 		}
 	}
 }

@@ -5,10 +5,13 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsTestbed", "WindowsTestbed.csproj", "{5B24619C-59B3-40EC-82E7-72E5EA44F77D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE} = {096DD8CD-3017-4003-8365-8F25FCE1EBFE}
 		{0E0FBB35-9E2A-4281-BA19-AA63A6480624} = {0E0FBB35-9E2A-4281-BA19-AA63A6480624}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoQuest2030", "..\GoQuest2030\GoQuest2030.csproj", "{0E0FBB35-9E2A-4281-BA19-AA63A6480624}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoQuestJsonSender", "..\GoQuestJsonSender\GoQuestJsonSender.csproj", "{096DD8CD-3017-4003-8365-8F25FCE1EBFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +27,10 @@ Global
 		{0E0FBB35-9E2A-4281-BA19-AA63A6480624}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E0FBB35-9E2A-4281-BA19-AA63A6480624}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E0FBB35-9E2A-4281-BA19-AA63A6480624}.Release|Any CPU.Build.0 = Release|Any CPU
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

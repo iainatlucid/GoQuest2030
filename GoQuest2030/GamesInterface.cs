@@ -14,13 +14,14 @@ namespace Lucid.GoQuest
 	public delegate void JsonAction(JToken args);
 	internal class GamesInterface
 	{
-		internal Thread thread;
+		private TcpClient tcp;
+		private Thread thread;
 		private readonly List<JsonAction> jsonActions = new List<JsonAction>();
 		private Dictionary<string, List<object>> elems;
+		private volatile bool valid;
 		internal GamesInterface()
 		{
 			elems = new Dictionary<string, List<object>>();
-			jsonActions.Add(Mary);
 			foreach (string line in File.ReadLines(Directory.GetCurrentDirectory() + @"\..\..\..\jsonactions.txt"))
 			{
 				var equals = line.Split('=');
@@ -35,45 +36,76 @@ namespace Lucid.GoQuest
 			thread = new Thread(read);
 			thread.Start();
 		}
+		private void poll(object ns)
+		{
+			byte[] bytes = Encoding.GetEncoding(28591).GetBytes("{}");
+			//int linebreaker = 0;
+			try
+			{
+				while (true)
+				{
+					((NetworkStream)ns).Write(bytes, 0, 2);
+					Thread.Sleep(1000);
+					//if (linebreaker++ == 10)
+					//{
+					//	Console.WriteLine("Closing receiver...");
+					//	tcp.Close();
+					//	linebreaker = 0;
+					//}
+
+				}
+			}
+			catch {valid = false; }
+		}
+		public void AddAction(JsonAction action)
+		{
+			if (jsonActions.Contains(action)) return;
+			jsonActions.Add(action);
+		}
 		private void read()
 		{
-			var tl = new TcpListener(IPAddress.Any, 12345);
-			tl.Start();
-			var sk = tl.AcceptTcpClient();
-			var ns = sk.GetStream();
-			var sr = new StreamReader(ns, Encoding.GetEncoding(28591));
-			var jr = new JsonTextReader(sr);
-			jr.SupportMultipleContent = true;
 			while (true)
-				try
-				{
-					while (jr.Read())
+			{
+				var tl = new TcpListener(IPAddress.Any, 12345);
+				tl.Start();
+				tcp = tl.AcceptTcpClient();
+				var ns = tcp.GetStream();
+				tl.Stop();
+				new Thread(poll).Start(ns);
+				var sr = new StreamReader(ns, Encoding.GetEncoding(28591));
+				var jr = new JsonTextReader(sr);
+				jr.SupportMultipleContent = true;
+				valid = true;
+				while (valid)
+					try
 					{
-						var tokens = new JsonSerializer().Deserialize<JToken>(jr);
-						foreach (var j in elems)
+						jr = new JsonTextReader(sr);
+						jr.SupportMultipleContent = true;
+						while (jr.Read())
 						{
-							var t = tokens;
-							foreach (var v in j.Value)
+							var tokens = new JsonSerializer().Deserialize<JToken>(jr);
+							foreach (var j in elems)
 							{
-								t = t[v];
-								if (t == null)
-									goto skip;
+								var t = tokens;
+								foreach (var v in j.Value)
+								{
+									t = t[v];
+									if (t == null)
+										goto skip;
+								}
+								jsonActions.Where(a => a.Method.Name.Equals(j.Key)).First()(t);
+							skip:;
 							}
-							jsonActions.Where(a => a.Method.Name.Equals(j.Key)).First()(t);
-						skip:;
 						}
 					}
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine("GamesInterface::Read: '{0}'", e.Message);
-					jr = new JsonTextReader(new StreamReader(ns, Encoding.GetEncoding(28591)));
-					jr.SupportMultipleContent = true;
-				}
-		}
-		private void Mary(JToken j)
-		{
-			Console.WriteLine("Mary {0}", j);
+					catch (Exception e)
+					{
+						//Console.WriteLine("GamesInterface::Read: '{0}'", e.Message);
+						sr.Dispose();
+						ns.Dispose();
+						tcp.Dispose();
+					}
+			}
 		}
 	}
 }
