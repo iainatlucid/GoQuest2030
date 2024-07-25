@@ -4,7 +4,6 @@ namespace Lucid.GoQuest
 	public class MainForm : Form
 	{
 		private int GAMES = 30;
-		private List<Button> Play = new List<Button>();
 		private GoQuestJsonSender json;
 		public MainForm()
 		{

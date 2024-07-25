@@ -42,7 +42,6 @@ namespace Lucid.GoQuest
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
 		[JsonProperty] private SafeList<Team> teams;
 		[JsonProperty] internal SafeGamesList games;
-		public static TeamSequencer Sequencer = new TeamSequencer();
 		private GamesInterface gif = new GamesInterface();
 		private GoQuest2030() { }
 		private GoQuest2030 detokenise()
@@ -72,7 +71,7 @@ namespace Lucid.GoQuest
 				file.Write(s);
 			detokenise();
 		}
-		public static void print()
+		public static void Print()
 		{
 			Console.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
 		}

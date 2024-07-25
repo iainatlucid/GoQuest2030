@@ -5,26 +5,33 @@ using System.Threading;
 
 namespace Lucid.GoQuest
 {
-	internal class Team : Base
+	//Production
+	internal partial class Team : Base
 	{
-		internal static int TeamsInPlay = 0;
 		private int id;
-		internal int Played { get { return played.Count; } }
-		internal Team() { TeamsInPlay++; Console.WriteLine("Teams in play: {0}", TeamsInPlay); }
+		internal int Played { get { return gamesPlayed.Count; } }
 		internal Team(string n, int i) :this() { name = n; id = i; }
-		private List<Game> played = new List<Game>();
+		private List<Game> gamesPlayed = new List<Game>();
+	}
+	//Test
+	internal partial class Team : Base
+	{
+		internal static int teamsInPlay = 0;
+		internal Team() { teamsInPlay++; Console.WriteLine("Teams in play: {0}", teamsInPlay); }
 		private Thread autoplay;
 		internal void Autoplay() { autoplay = new Thread(play); autoplay.Start(); }
+		internal Action<string> StartGame { get; set; }
 		private void play(object o)
 		{
 			Game g;
-			if ((g = GoQuest2030.Instance.games.ClaimFirstEmpty(played)) != null)
+			if ((g = GoQuest2030.Instance.games.ClaimFirstEmpty(gamesPlayed)) != null)
 			{
-				played.Add(g);
+				//StartGame(g.ID);
+				gamesPlayed.Add(g);
 				g.Play(this, id, play);
 			}
-			else if (played.Count == GoQuest2030.Instance.games.Count)
-				Console.WriteLine("***********************************************Team {0} FINISHED, teams in play={1}", name, --TeamsInPlay);
+			else if (gamesPlayed.Count == GoQuest2030.Instance.games.Count)
+				Console.WriteLine("***********************************************Team {0} FINISHED, teams in play={1}", name, --teamsInPlay);
 			else
 			{
 				Thread.Sleep(100);

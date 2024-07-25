@@ -1,19 +1,26 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lucid.GoQuest
 {
+	public static class AutoPlayer
+	{
+		private static TeamSequencer seq;
+		public static void Start()
+		{
+			seq = new TeamSequencer();
+			seq.Start();
+		}
+	}
 	public class TeamSequencer
 	{
-		[JsonProperty] private readonly int TOTAL_TEAMS = 25;
+		[JsonProperty] private readonly int TEAMS = 25;
 		private Thread start;
+		private GoQuestJsonSender json;
 		public void Start() { start = new Thread(run); start.Start(); }
 		private void run()
 		{
-			for (int i = 1; i <= TOTAL_TEAMS; i++)
+			for (int i = 1; i <= TEAMS; i++)
 			{
 				var t = new Team(i.ToString(), i);
 				t.Autoplay();

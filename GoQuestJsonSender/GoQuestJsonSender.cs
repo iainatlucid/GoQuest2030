@@ -15,6 +15,14 @@ namespace Lucid.GoQuest
 		private int presses;
 		private Thread t;
 		private volatile bool valid;
+		public Action<ushort> OpenDoor { get; set; }
+		public Action<ushort> GameControl { get; set; }
+		public Action<ushort> DoorInhibit { get; set; }
+		public Action<ushort> HintAvailable { get; set; }
+		public Action<ushort> SuperQuestAvailable { get; set; }
+		public Action<string> TeamName { get; set; }
+		public Action<string> TeamScore { get; set; }
+		public Action<ushort> RemainingSessionTime { get; set; }
 
 		public GoQuestJsonSender()
 		{
@@ -134,7 +142,13 @@ namespace Lucid.GoQuest
 			return null;
 		}
 		public void GameName(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
-		public void GameStart(object id) { AddProperty(new string[] { "Jesus", "Trashed", "My", "Hotrod" }, "GameStart", id); }
+		public void GameTimeTotal(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
+		public void GameTimeRemaining(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
+		public void GameStart(object id, bool hard = false) { AddProperty(new string[] { "Jesus", "Trashed", "My", "Hotrod" }, "GameStart", id); }
+		public void Milestone(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
+		public void GameOver(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
+		public void Hint(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
+		public void Door(object id, bool closed) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
 		public void SuperQuest(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
 		public void Release()
 		{
