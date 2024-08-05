@@ -47,13 +47,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoPlayer.cs" />
-    <Compile Include="Base.cs" />
-    <Compile Include="GamesInterface.cs" />
-    <Compile Include="GameVersion.cs" />
-    <Compile Include="GoQuest2030.cs" />
+    <Compile Include="..\AutoPlayer.cs">
+      <Link>AutoPlayer.cs</Link>
+    </Compile>
+    <Compile Include="..\Base.cs">
+      <Link>Base.cs</Link>
+    </Compile>
+    <Compile Include="..\GamesInterface.cs">
+      <Link>GamesInterface.cs</Link>
+    </Compile>
+    <Compile Include="..\GameVersion.cs">
+      <Link>GameVersion.cs</Link>
+    </Compile>
+    <Compile Include="..\GoQuest2030.cs">
+      <Link>GoQuest2030.cs</Link>
+    </Compile>
+    <Compile Include="..\Team.cs">
+      <Link>Team.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Team.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
