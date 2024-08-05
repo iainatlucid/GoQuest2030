@@ -5,15 +5,16 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsTestbed", "WindowsTestbed.csproj", "{5B24619C-59B3-40EC-82E7-72E5EA44F77D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{096DD8CD-3017-4003-8365-8F25FCE1EBFE} = {096DD8CD-3017-4003-8365-8F25FCE1EBFE}
 		{0E0FBB35-9E2A-4281-BA19-AA63A6480624} = {0E0FBB35-9E2A-4281-BA19-AA63A6480624}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoQuest2030", "..\GoQuest2030\GoQuest2030.csproj", "{0E0FBB35-9E2A-4281-BA19-AA63A6480624}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoQuest2030Win", "..\WindowsDLL\GoQuest2030Win.csproj", "{0E0FBB35-9E2A-4281-BA19-AA63A6480624}"
 	ProjectSection(ProjectDependencies) = postProject
 		{096DD8CD-3017-4003-8365-8F25FCE1EBFE} = {096DD8CD-3017-4003-8365-8F25FCE1EBFE}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoQuestJsonSender", "..\GoQuestJsonSender\GoQuestJsonSender.csproj", "{096DD8CD-3017-4003-8365-8F25FCE1EBFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoQuestJsonSender", "..\JsonSender\GoQuestJsonSender.csproj", "{096DD8CD-3017-4003-8365-8F25FCE1EBFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

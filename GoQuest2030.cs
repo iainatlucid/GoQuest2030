@@ -7,6 +7,13 @@ using System.Linq;
 
 namespace Lucid.GoQuest
 {
+	public static class StdOut
+	{
+		public static Action<object> WriteStr { get; set; }
+		public static Action<string, object[]> WriteFmt { get; set; }
+		public static void WriteLine(string str) { WriteStr(str); }
+		public static void WriteLine(string str, params object[] args) { WriteFmt(str, args); }
+	}
 	internal class SafeList<T>
 	{
 		[JsonProperty] protected List<T> list;
@@ -17,8 +24,7 @@ namespace Lucid.GoQuest
 		internal bool Remove(T elem) { lock (this) return list.Remove(elem); }
 		internal IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
 		internal T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
-
-		internal void print() { return; lock (this) foreach (var v in list) Console.WriteLine(v); }
+		internal void print() { return; lock (this) foreach (var v in list) StdOut.WriteLine(v.ToString()); }
 	}
 	internal class SafeGamesList : SafeList<Game>
 	{
@@ -65,7 +71,7 @@ namespace Lucid.GoQuest
 			if (File.Exists(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
 			{
 				try { File.Delete(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"); }
-				catch (Exception e) { Console.WriteLine("EXCEPTION: serialise(): Cannot delete file: \r\n{0}", e.StackTrace); }
+				catch (Exception e) { StdOut.WriteLine("EXCEPTION: serialise(): Cannot delete file: \r\n{0}", e.StackTrace); }
 			}
 			using (var file = File.CreateText(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
 				file.Write(s);
@@ -73,7 +79,7 @@ namespace Lucid.GoQuest
 		}
 		public static void Print()
 		{
-			Console.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
+			StdOut.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
 		}
 		private GoQuest2030 init()
 		{
@@ -85,19 +91,19 @@ namespace Lucid.GoQuest
 		}
 		private void gameStart(JToken token)
 		{
-			Console.WriteLine("GameStarted {0}", token.ToString());
+			StdOut.WriteLine("GameStarted {0}", token.ToString());
 		}
 		private void superQuest(JToken token)
 		{
-			Console.WriteLine("SuperQuest {0}", token.ToString());
+			StdOut.WriteLine("SuperQuest {0}", token.ToString());
 		}
 		private void gameName(JToken token)
 		{
-			Console.WriteLine("GameName {0}", token.ToString());
+			StdOut.WriteLine("GameName {0}", token.ToString());
 		}
 		private void test(JToken token)
 		{
-			Console.WriteLine("test {0}", token.ToString());
+			StdOut.WriteLine("test {0}", token.ToString());
 		}
 	}
 }

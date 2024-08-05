@@ -14,6 +14,8 @@ namespace Lucid.GoQuest
 		static void Main()
 		{
 			ConsoleWindow(true);
+			StdOut.WriteStr = Console.WriteLine;
+			StdOut.WriteFmt = Console.WriteLine;
 			GoQuest2030.Print();
 			AutoPlayer.Start();
 			Application.EnableVisualStyles();

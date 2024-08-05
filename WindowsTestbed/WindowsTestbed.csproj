@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="GoQuest2030">
-      <HintPath>..\GoQuest2030\bin\Debug\GoQuest2030.dll</HintPath>
+    <Reference Include="GoQuest2030Win">
+      <HintPath>..\WindowsDLL\bin\Debug\GoQuest2030Win.dll</HintPath>
     </Reference>
     <Reference Include="GoQuestJsonSender">
-      <HintPath>..\GoQuestJsonSender\bin\Debug\net6.0\GoQuestJsonSender.dll</HintPath>
+      <HintPath>..\JsonSender\bin\Debug\net6.0\GoQuestJsonSender.dll</HintPath>
     </Reference>
   </ItemGroup>
 
