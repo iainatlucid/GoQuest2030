@@ -19,9 +19,15 @@ namespace Lucid.GoQuest
 		private readonly List<JsonAction> jsonActions = new List<JsonAction>();
 		private Dictionary<string, List<object>> elems;
 		private volatile bool valid;
+		internal Dictionary<string, Action> GameStarts { get; set; }
+		internal Dictionary<string, Action> SuperQuests { get; set; }
+		internal Dictionary<string, Action> GameNames { get; set; }
 		internal GamesInterface()
 		{
 			elems = new Dictionary<string, List<object>>();
+			GameStarts = new Dictionary<string, Action>();
+			SuperQuests = new Dictionary<string, Action>();
+			GameNames = new Dictionary<string, Action>();
 			foreach (string line in File.ReadLines(GoQuest2030.Path + "jsonactions.txt"))
 			{
 				var equals = line.Split('=');
@@ -33,8 +39,37 @@ namespace Lucid.GoQuest
 					catch { objects.Add(s); }
 				elems.Add(equals[1], objects);
 			}
-			thread = new Thread(read);
+			jsonActions.Add(gameStart);
+			jsonActions.Add(superQuest);
+			jsonActions.Add(gameName);
+			thread = new Thread(run);
 			thread.Start();
+		}
+		private void gameStart(JToken token)
+		{
+			//StdOut.WriteLine("GameStart {0}", token.ToString());
+			try
+			{
+				var values = token.Value<JArray>();
+				foreach (var v in values)
+					GameStarts[v.ToString()]();
+			}
+			catch (Exception e) { StdOut.WriteStr(e.Message); }
+		}
+		private void superQuest(JToken token)
+		{
+			//StdOut.WriteLine("SuperQuest {0}", token.ToString());
+			try
+			{
+				var values = token.Value<JArray>();
+				foreach (var v in values)
+					SuperQuests[v.ToString()]();
+			}
+			catch (Exception e) { StdOut.WriteStr(e.Message); }
+		}
+		private void gameName(JToken token)
+		{
+			//StdOut.WriteLine("GameName {0}", token.ToString());
 		}
 		private void poll(object ns)
 		{
@@ -62,7 +97,7 @@ namespace Lucid.GoQuest
 			if (jsonActions.Contains(action)) return;
 			jsonActions.Add(action);
 		}
-		private void read()
+		private void run()
 		{
 			while (true)
 			{

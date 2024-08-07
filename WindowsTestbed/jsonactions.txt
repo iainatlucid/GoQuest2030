@@ -1,3 +1,3 @@
 Jesus/Built/My/Hotrod=gameName
-Jesus/Trashed/My/Hotrod=gameStart
-Jesus/Ate/My/Hotrod=superQuest
+Jesus/Trashed/My/Hotrod/GameStart=gameStart
+Jesus/Ate/My/Hotrod/SuperQuest=superQuest

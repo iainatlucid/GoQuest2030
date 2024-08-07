@@ -10,7 +10,7 @@ namespace Lucid.GoQuest
 		private TcpClient tcp;
 		private NetworkStream ns;
 		private StreamWriter sw;
-		private JObject jobj;
+		private JObject jobj=new JObject();
 		private JsonTextWriter jw;
 		private int presses;
 		private Thread t;
@@ -47,6 +47,7 @@ namespace Lucid.GoQuest
 							break;
 						case 1:
 							tcp.Connect("192.168.2.117", 12345);
+							//tcp.Connect("127.0.0.1", 12345);
 							ns = tcp.GetStream();
 							sw = new StreamWriter(ns, Encoding.GetEncoding(28591));
 							jw = new JsonTextWriter(sw);
@@ -146,10 +147,10 @@ namespace Lucid.GoQuest
 			}
 			return null;
 		}
-		public void GameName(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty(id.ToString(), "GameName")); }
+		public void GameName(object id) { AddProperty(new string[] { "Jesus", "Built", "My", "Hotrod" },id.ToString(), "GameName"); }
 		public void GameTimeTotal(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
 		public void GameTimeRemaining(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
-		public void GameStart(object id, bool hard = false) { AddProperty(new string[] { "Jesus", "Trashed", "My", "Hotrod" }, "GameStart", id); }
+		public void GameStart(object id, bool hard = false) { AddArray(new string[] { "Jesus", "Trashed", "My", "Hotrod" }, "GameStart", id); }
 		public void Milestone(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
 		public void GameOver(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }
 		public void Hint(object id) { AddArray(new string[] { "Jesus", "Ate", "My", "Hotrod" }, "SuperQuest", id); }

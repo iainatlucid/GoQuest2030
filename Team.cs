@@ -11,7 +11,7 @@ namespace Lucid.GoQuest
 		private int id;
 		internal int Played { get { return gamesPlayed.Count; } }
 		internal Team(string n, int i) :this() { name = n; id = i; }
-		private List<Game> gamesPlayed = new List<Game>();
+		private List<GameVersion> gamesPlayed = new List<GameVersion>();
 	}
 	//Test
 	internal partial class Team : Base
@@ -23,7 +23,7 @@ namespace Lucid.GoQuest
 		internal Action<string> StartGame { get; set; }
 		private void play(object o)
 		{
-			Game g;
+			GameVersion g;
 			if ((g = GoQuest2030.Instance.games.ClaimFirstEmpty(gamesPlayed)) != null)
 			{
 				//StartGame(g.ID);

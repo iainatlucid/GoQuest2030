@@ -26,9 +26,9 @@ namespace Lucid.GoQuest
 		internal T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
 		internal void print() { return; lock (this) foreach (var v in list) StdOut.WriteLine(v.ToString()); }
 	}
-	internal class SafeGamesList : SafeList<Game>
+	internal class SafeGameVersionsList : SafeList<GameVersion>
 	{
-		internal Game ClaimFirstEmpty(List<Game> played)
+		internal GameVersion ClaimFirstEmpty(List<GameVersion> played)
 		{
 			lock (list)
 			{
@@ -39,6 +39,12 @@ namespace Lucid.GoQuest
 				return null;
 			}
 		}
+		internal void AddDelegates(GamesInterface gif)
+		{
+			lock (list)
+				foreach (var g in list)
+					g.AddDelegates(gif);
+		}
 	}
 	public class GoQuest2030
 	{
@@ -48,7 +54,7 @@ namespace Lucid.GoQuest
 		[JsonIgnore] public static string Path { get; set; }
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
 		[JsonProperty] private SafeList<Team> teams;
-		[JsonProperty] internal SafeGamesList games;
+		[JsonProperty] internal SafeGameVersionsList games;
 		private GamesInterface gif = new GamesInterface();
 		private GoQuest2030() { }
 		private GoQuest2030 detokenise()
@@ -84,27 +90,8 @@ namespace Lucid.GoQuest
 		}
 		private GoQuest2030 init()
 		{
-			gif.AddAction(gameStart);
-			gif.AddAction(superQuest);
-			gif.AddAction(gameName);
-			gif.AddAction(test);
+			games.AddDelegates(gif);
 			return this;
-		}
-		private void gameStart(JToken token)
-		{
-			StdOut.WriteLine("GameStarted {0}", token.ToString());
-		}
-		private void superQuest(JToken token)
-		{
-			StdOut.WriteLine("SuperQuest {0}", token.ToString());
-		}
-		private void gameName(JToken token)
-		{
-			StdOut.WriteLine("GameName {0}", token.ToString());
-		}
-		private void test(JToken token)
-		{
-			StdOut.WriteLine("test {0}", token.ToString());
 		}
 	}
 }

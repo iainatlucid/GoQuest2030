@@ -5,6 +5,39 @@ namespace Lucid.GoQuest
 	{
 		private int GAMES = 30;
 		private GoQuestJsonSender json;
+		private List<string> gameNames = new List<string>
+		{
+				"Monty On The Run"
+				,"Wizball"
+				,"William Wobbler"
+				,"Nemesis The Warlock"
+				,"Thing On A Spring"
+				,"Zoids"
+				,"Suicide Express"
+				,"Kikstart"
+				,"Commando"
+				,"Master Of Magic"
+				,"Gauntlet"
+				,"The Last V8"
+				,"Atic Atac"
+				,"Underwurlde"
+				,"Jetpac"
+				,"Paradroid"
+				,"Sabre Wulf"
+				,"The Hobbit"
+				,"Lunar Jetman"
+				,"Manic Miner"
+				,"Jetset Willy"
+				,"Bugsplat"
+				,"Game Of Life"
+				,"Adventure A: Planet Of Death"
+				,"Fungaloids"
+				,"Penetrator"
+				,"Tranz-Am"
+				,"Cookie"
+				,"Schooldaze"
+				,"Dracula"
+			};
 		public MainForm()
 		{
 			SuspendLayout();
@@ -56,13 +89,12 @@ namespace Lucid.GoQuest
 			Thread.Sleep(2000);
 			while (true)
 			{
-				json.GameStart(string.Format("Play{0}", j));
-				json.Release();
-				json.SuperQuest(string.Format("Super{0}", j));
-				json.Release();
-				json.GameName(string.Format("Name{0}", j++));
-				json.Release();
-				Thread.Sleep(300);
+				json.GameStart(gameNames[j]);
+				json.SuperQuest(gameNames[j]);
+				json.GameName(gameNames[j++]);
+				//json.Release(); json.Release(); json.Release();
+				if (j == gameNames.Count) j = 0;
+				Thread.Sleep(100);
 			}
 		}
 		private void play_MouseDown(object sender, MouseEventArgs e) { json.GameStart(((Control)sender).Name); }
