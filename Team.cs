@@ -20,7 +20,7 @@ namespace Lucid.GoQuest
 		private TeamStatus status = TeamStatus.Waiting;
 		public TeamStatus PlayStatus { get { return status; } set { status = value; } }
 		internal int Played { get { return gamesPlayed.Count; } }
-		internal Team(string n) { name = n; }
+		internal Team(string n, int i) :this() { name = n; id = i; }
 		private List<GameVersion> gamesPlayed = new List<GameVersion>();
 	}
 	//Test

@@ -24,7 +24,7 @@ namespace Lucid.GoQuest
 				if (Team.TeamsInPlay == 0)
 					for (int i = 1; i <= TEAMS; i++)
 					{
-						var t = new Team(i.ToString());
+						var t = new Team(i.ToString(), i);
 						t.Autoplay();
 						if (i % 10 == 0) Thread.Sleep(1000);
 					}
