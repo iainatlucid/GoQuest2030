@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Lucid.GoQuest
 {
@@ -17,14 +18,18 @@ namespace Lucid.GoQuest
 	internal class SafeList<T>
 	{
 		[JsonProperty] protected List<T> list;
+		public T this[int key] { get => list[key]; set => list[key] = value; }
 		[JsonIgnore] public int Count { get { return list.Count; } }
 		internal SafeList() { list = new List<T>(); }
 		internal void Add(T elem) { lock (this) list.Add(elem); }
+		internal bool TryAdd(T elem) { lock (this) { if (list.Contains(elem)) return false; Add(elem); return true; } }
 		internal bool Contains(T elem) { lock (this) return list.Contains(elem); }
 		internal bool Remove(T elem) { lock (this) return list.Remove(elem); }
+		internal void ForEach(Action<T> act) { lock (this) foreach (var t in list) act(t); }
+		internal bool Any(Func<T, bool> pred) { lock (this) { return Where(pred).Count() > 0; } }
 		internal IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
 		internal T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
-		internal void print() { return; lock (this) foreach (var v in list) StdOut.WriteLine(v.ToString()); }
+		internal void print() { lock (this) foreach (var v in list) StdOut.WriteLine(v.ToString()); }
 	}
 	internal class SafeGameVersionsList : SafeList<GameVersion>
 	{
@@ -46,27 +51,28 @@ namespace Lucid.GoQuest
 					g.AddDelegates(gif);
 		}
 	}
-	public class GoQuest2030
+	public class GoQuest
 	{
 		private static readonly byte MAJOR_REV = 0, MINOR_REV = 0, RELEASE_REV = 1;
 		private static readonly string REV_SUFFIX = "";
-		private static GoQuest2030 instance = null;
+		private static GoQuest instance = null;
 		[JsonIgnore] public static string Path { get; set; }
-		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
-		[JsonProperty] private SafeList<Team> teams;
-		[JsonProperty] internal SafeGameVersionsList games;
+		[JsonIgnore] public static GoQuest Instance { get { return instance == null ? instance = deserialise() : instance; } }
+		[JsonProperty] internal SafeList<Team> teams;
+		[JsonProperty] internal SafeGameVersionsList gameversions;
 		private GamesInterface gif = new GamesInterface();
-		private GoQuest2030() { }
-		private GoQuest2030 detokenise()
+		public static bool cleaning;
+		private GoQuest() { }
+		private GoQuest detokenise()
 		{
 			return this;
 		}
-		private static GoQuest2030 deserialise()
+		private static GoQuest deserialise()
 		{
 			string s;
 			using (var file = new StreamReader(new FileStream(Path + "goquest.json", FileMode.Open)))
 				s = file.ReadToEnd();
-			return JsonConvert.DeserializeObject<GoQuest2030>(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }).detokenise().init();
+			return JsonConvert.DeserializeObject<GoQuest>(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }).detokenise().init();
 		}
 		private void tokenise()
 		{
@@ -88,10 +94,65 @@ namespace Lucid.GoQuest
 		{
 			StdOut.WriteLine(JsonConvert.SerializeObject(Instance, Formatting.Indented));
 		}
-		private GoQuest2030 init()
+		private GoQuest init()
 		{
-			games.AddDelegates(gif);
+			gameversions.AddDelegates(gif);
 			return this;
+		}
+		public static bool AddTeam(string name)
+		{
+			bool ret = instance.teams.TryAdd(new Team(name));
+			/*
+			lock (objectsync)
+			{
+				foreach (var t in instance.teams)
+					if (t.Name.Equals(name))
+						return false;
+				var team = new Team(name);
+				instance.teams.Add(team);
+				sql.AddTeam(team);
+				instance.serialise("GoQuest.AddTeam", name);
+				return true;
+			}
+			*/
+			instance.serialise();
+			return ret;
+		}
+		public static void ToggleCleaning()
+		{
+			if (instance.teams.Any((t) => { return t.PlayStatus == TeamStatus.Playing || t.PlayStatus == TeamStatus.Waiting; })) return;
+			/*
+			lock (objectsync)
+			{
+				foreach (var t in instance.teams)
+					if (t.PlayStatus == TeamStatus.Playing || t.PlayStatus == TeamStatus.Waiting)
+						return;
+			}
+			*/
+			cleaning = !cleaning;
+		}
+		/*
+		public static void TryDeleteAllTeams()
+		{
+			var del = new List<Team>();
+			lock (objectsync)
+			{
+				foreach (var t in instance.teams)
+					if (t.PlayStatus != TeamStatus.Playing && t.Game == null)
+						del.Add(t);
+				foreach (var t in del)
+					instance.teams.Remove(t);
+				instance.serialise("GoQuest.TryDeleteAllTeams", string.Empty);
+			}
+		}
+		*/
+		public static IEnumerable<Enum> GetValues(Enum e)
+		{
+			List<Enum> list = new List<Enum>();
+			Type type = e.GetType();
+			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Static | BindingFlags.Public))
+				list.Add((Enum)fieldInfo.GetValue(e));
+			return list;
 		}
 	}
 }

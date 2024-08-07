@@ -28,7 +28,7 @@ namespace Lucid.GoQuest
 			GameStarts = new Dictionary<string, Action>();
 			SuperQuests = new Dictionary<string, Action>();
 			GameNames = new Dictionary<string, Action>();
-			foreach (string line in File.ReadLines(GoQuest2030.Path + "jsonactions.txt"))
+			foreach (string line in File.ReadLines(GoQuest.Path + "jsonactions.txt"))
 			{
 				var equals = line.Split('=');
 				if (equals.Length <= 1) continue;

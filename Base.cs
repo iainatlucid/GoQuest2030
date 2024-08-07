@@ -7,6 +7,7 @@ namespace Lucid.GoQuest
 	{
 		[JsonProperty] protected int id;
 		[JsonProperty] protected string name;
+		[JsonIgnore] internal string Name { get => name; }
 		public override string ToString() { return name; }
 	}
 }

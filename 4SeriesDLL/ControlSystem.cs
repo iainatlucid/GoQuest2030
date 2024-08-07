@@ -60,8 +60,8 @@ namespace Lucid.GoQuest
 				SystemMonitor.CPUStatisticChange += new CPUStatisticChangeEventHandler((args) => CrestronConsole.PrintLine("CPU:{0}", args.Utilization));
 				StdOut.WriteStr = CrestronConsole.PrintLine;
 				StdOut.WriteFmt = CrestronConsole.PrintLine;
-				GoQuest2030.Path = "/user/goquest/";
-				GoQuest2030.Print();
+				GoQuest.Path = "/user/goquest/";
+				GoQuest.Print();
 				AutoPlayer.Start();
 			}
 			catch (Exception e)
