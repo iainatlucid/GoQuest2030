@@ -16,15 +16,19 @@ namespace Lucid.GoQuest
 	{
 		[JsonProperty] private readonly int TEAMS = 25;
 		private Thread start;
-		private GoQuestJsonSender json;
 		public void Start() { start = new Thread(run); start.Start(); }
 		private void run()
 		{
-			for (int i = 1; i <= TEAMS; i++)
+			while (true)
 			{
-				var t = new Team(i.ToString(), i);
-				t.Autoplay();
-				if (i % 10 == 0) Thread.Sleep(1000);
+				if (Team.TeamsInPlay == 0)
+					for (int i = 1; i <= TEAMS; i++)
+					{
+						var t = new Team(i.ToString(), i);
+						t.Autoplay();
+						if (i % 10 == 0) Thread.Sleep(1000);
+					}
+				Thread.Sleep(500);
 			}
 		}
 	}

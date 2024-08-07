@@ -38,6 +38,7 @@ namespace Lucid.GoQuest
 			{
 				try
 				{
+					Console.WriteLine("State={0}", state);
 					switch (state)
 					{
 						case 0:
@@ -45,7 +46,7 @@ namespace Lucid.GoQuest
 							state++;
 							break;
 						case 1:
-							tcp.Connect("127.0.0.1", 12345);
+							tcp.Connect("192.168.2.117", 12345);
 							ns = tcp.GetStream();
 							sw = new StreamWriter(ns, Encoding.GetEncoding(28591));
 							jw = new JsonTextWriter(sw);
@@ -85,9 +86,13 @@ namespace Lucid.GoQuest
 		}
 		private void send()
 		{
-			jobj.WriteTo(jw);
-			jobj = new JObject();
-			jw.Flush();
+			try
+			{
+				jobj.WriteTo(jw);
+				jobj = new JObject();
+				jw.Flush();
+			}
+			catch { Console.WriteLine("Failed to send()"); }
 			presses = 0;
 		}
 		private JObject AddArray(string[] path, string key, object value, bool unique = true)
@@ -141,7 +146,7 @@ namespace Lucid.GoQuest
 			}
 			return null;
 		}
-		public void GameName(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
+		public void GameName(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty(id.ToString(), "GameName")); }
 		public void GameTimeTotal(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
 		public void GameTimeRemaining(object id) { AddObject(new string[] { "Jesus", "Built", "My", "Hotrod" }).Add(new JProperty("aaaa", "bisto")); }
 		public void GameStart(object id, bool hard = false) { AddProperty(new string[] { "Jesus", "Trashed", "My", "Hotrod" }, "GameStart", id); }

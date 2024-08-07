@@ -9,7 +9,7 @@ namespace Lucid.GoQuest
 {
 	public static class StdOut
 	{
-		public static Action<object> WriteStr { get; set; }
+		public static Action<string> WriteStr { get; set; }
 		public static Action<string, object[]> WriteFmt { get; set; }
 		public static void WriteLine(string str) { WriteStr(str); }
 		public static void WriteLine(string str, params object[] args) { WriteFmt(str, args); }
@@ -45,6 +45,7 @@ namespace Lucid.GoQuest
 		private static readonly byte MAJOR_REV = 0, MINOR_REV = 0, RELEASE_REV = 1;
 		private static readonly string REV_SUFFIX = "";
 		private static GoQuest2030 instance = null;
+		[JsonIgnore] public static string Path { get; set; }
 		[JsonIgnore] public static GoQuest2030 Instance { get { return instance == null ? instance = deserialise() : instance; } }
 		[JsonProperty] private SafeList<Team> teams;
 		[JsonProperty] internal SafeGamesList games;
@@ -57,7 +58,7 @@ namespace Lucid.GoQuest
 		private static GoQuest2030 deserialise()
 		{
 			string s;
-			using (var file = new StreamReader(new FileStream(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json", FileMode.Open)))
+			using (var file = new StreamReader(new FileStream(Path + "goquest.json", FileMode.Open)))
 				s = file.ReadToEnd();
 			return JsonConvert.DeserializeObject<GoQuest2030>(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }).detokenise().init();
 		}
@@ -68,12 +69,12 @@ namespace Lucid.GoQuest
 		{
 			tokenise();
 			var s = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
-			if (File.Exists(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
+			if (File.Exists(Path + "goquest.json"))
 			{
-				try { File.Delete(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"); }
+				try { File.Delete(Path + "goquest.json"); }
 				catch (Exception e) { StdOut.WriteLine("EXCEPTION: serialise(): Cannot delete file: \r\n{0}", e.StackTrace); }
 			}
-			using (var file = File.CreateText(Directory.GetCurrentDirectory() + @"\..\..\..\goquest.json"))
+			using (var file = File.CreateText(Path + "goquest.json"))
 				file.Write(s);
 			detokenise();
 		}

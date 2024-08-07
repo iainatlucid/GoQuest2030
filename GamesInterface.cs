@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading; 
+using System.Threading;
 
 namespace Lucid.GoQuest
 {
@@ -22,7 +22,7 @@ namespace Lucid.GoQuest
 		internal GamesInterface()
 		{
 			elems = new Dictionary<string, List<object>>();
-			foreach (string line in File.ReadLines(Directory.GetCurrentDirectory() + @"\..\..\..\jsonactions.txt"))
+			foreach (string line in File.ReadLines(GoQuest2030.Path + "jsonactions.txt"))
 			{
 				var equals = line.Split('=');
 				if (equals.Length <= 1) continue;
@@ -55,7 +55,7 @@ namespace Lucid.GoQuest
 
 				}
 			}
-			catch {valid = false; }
+			catch { valid = false; }
 		}
 		public void AddAction(JsonAction action)
 		{

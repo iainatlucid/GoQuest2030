@@ -52,6 +52,18 @@ namespace Lucid.GoQuest
 			Text = "GoQuest 2030 Room Buttons";
 			ResumeLayout(false);
 			json = new GoQuestJsonSender();
+			int j = 0;
+			Thread.Sleep(2000);
+			while (true)
+			{
+				json.GameStart(string.Format("Play{0}", j));
+				json.Release();
+				json.SuperQuest(string.Format("Super{0}", j));
+				json.Release();
+				json.GameName(string.Format("Name{0}", j++));
+				json.Release();
+				Thread.Sleep(300);
+			}
 		}
 		private void play_MouseDown(object sender, MouseEventArgs e) { json.GameStart(((Control)sender).Name); }
 		private void super_MouseDown(object sender, MouseEventArgs e) { json.SuperQuest(((Control)sender).Name); }
