@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Threading;
+﻿using System.Threading;
 
 namespace Lucid.GoQuest
 {
@@ -16,7 +15,7 @@ namespace Lucid.GoQuest
 	public class TeamSequencer
 	{
 		public bool Quit { get; set; }
-		[JsonProperty] private readonly int TEAMS = 25;
+		private readonly int TEAMS = 25;
 		private Thread start;
 		public void Start() { start = new Thread(run); start.Start(); }
 		private void run()

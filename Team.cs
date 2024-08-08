@@ -24,19 +24,19 @@ namespace Lucid.GoQuest
 		private DateTime startTime = DateTime.MaxValue, endTime = DateTime.MaxValue;
 		private List<string> gamesWon, gamesTried;
 		private ushort score;
-		internal int Played { get { return gamesPlayed.Count; } }
-		internal Team(string n, int i) : this() { Name = n; ID = i; }
-		internal Team(Team t) { }
-		internal TeamStatus PlayStatus { get { return status; } set { status = value; } }
-		internal ushort PinCode { get { return pinCode; } set { pinCode = value; } }
-		internal DateTime StartTime { get { return startTime; } set { startTime = value; } }
-		internal DateTime EndTime { get { return endTime; } set { endTime = value; } }
-		internal List<string> GamesWon { get { return gamesWon; } set { gamesWon = value; } }
-		internal List<string> GamesTried { get { return gamesTried; } set { gamesTried = value; } }
-		internal ushort Score { get { return score; } set { score = value; } }
+		[JsonIgnore] internal int Played { get { return gamesPlayed.Count; } }
+		[JsonIgnore] internal TeamStatus PlayStatus { get { return status; } set { status = value; } }
+		[JsonIgnore] internal ushort PinCode { get { return pinCode; } set { pinCode = value; } }
+		[JsonIgnore] internal DateTime StartTime { get { return startTime; } set { startTime = value; } }
+		[JsonIgnore] internal DateTime EndTime { get { return endTime; } set { endTime = value; } }
+		[JsonIgnore] internal List<string> GamesWon { get { return gamesWon; } set { gamesWon = value; } }
+		[JsonIgnore] internal List<string> GamesTried { get { return gamesTried; } set { gamesTried = value; } }
+		[JsonIgnore] internal ushort Score { get { return score; } set { score = value; } }
 		[JsonIgnore] internal GameVersion Game;
 		[JsonIgnore] public byte JustFailed { get; set; }
 
+		internal Team(string n, int i) : this() { Name = n; ID = i; }
+		internal Team(Team t) { }
 		public string RemainingShortTimeString(bool secs)
 		{
 			TimeSpan remain;
@@ -89,11 +89,11 @@ namespace Lucid.GoQuest
 	internal partial class Team : Base
 	{
 		private bool quit;
-		public static int TeamsInPlay = 0;
+		[JsonIgnore]public static int TeamsInPlay = 0;
 		internal Team() { TeamsInPlay++; Console.WriteLine("Teams in play: {0}", TeamsInPlay); }
-		public Thread autoplay;
+		[JsonIgnore] public Thread autoplay;
 		internal void Autoplay() { autoplay = new Thread(play); autoplay.Start(); }
-		internal Action<string> StartGame { get; set; }
+		[JsonIgnore] internal Action<string> StartGame { get; set; }
 		public void Stop()
 		{
 			StdOut.WriteLine("Team {0} stopping...", Name);

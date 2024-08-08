@@ -131,7 +131,7 @@ namespace Lucid.GoQuest
 		}
 		public static bool AddTeam(string name)
 		{
-			bool ret = instance.teams.TryAdd(new Team(name, 0));
+			bool ret = true;// instance.teams.TryAdd(new Team(name, 0));
 			/*
 			lock (objectsync)
 			{

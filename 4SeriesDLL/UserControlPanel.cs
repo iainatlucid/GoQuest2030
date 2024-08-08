@@ -103,7 +103,7 @@ namespace Lucid.GoQuest
 		{
 			if ((currentDevice != panel) || (args.Sig.Number > 16000))
 				return;
-			//GoQuest.WriteConsole(0,0,"{0} said {1}, {2} and {3}", args.Sig.Number, args.Sig.BoolValue, args.Sig.UShortValue, args.Sig.StringValue);
+			//StdOut.WriteLine("{0} said {1}, {2} and {3}", args.Sig.Number, args.Sig.BoolValue, args.Sig.UShortValue, args.Sig.StringValue);
 			try
 			{
 				page.Signal(0, (ushort)args.Sig.Number, args.Sig);
