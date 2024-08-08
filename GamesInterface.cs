@@ -14,6 +14,7 @@ namespace Lucid.GoQuest
 	public delegate void JsonAction(JToken args);
 	internal class GamesInterface
 	{
+		private bool quit;
 		private TcpClient tcp;
 		private Thread thread;
 		private readonly List<JsonAction> jsonActions = new List<JsonAction>();
@@ -44,6 +45,17 @@ namespace Lucid.GoQuest
 			jsonActions.Add(gameName);
 			thread = new Thread(run);
 			thread.Start();
+		}
+		public void Stop()
+		{
+			StdOut.WriteLine("GamesInterface stopping...");
+			valid = false;
+			if (tcp != null)
+			{
+				tcp.Close();
+				tcp.Dispose();
+			}
+			StdOut.WriteLine("GamesInterface stopped.");
 		}
 		private void gameStart(JToken token)
 		{
@@ -77,7 +89,7 @@ namespace Lucid.GoQuest
 			//int linebreaker = 0;
 			try
 			{
-				while (true)
+				while (!quit)
 				{
 					((NetworkStream)ns).Write(bytes, 0, 2);
 					Thread.Sleep(1000);
@@ -99,7 +111,7 @@ namespace Lucid.GoQuest
 		}
 		private void run()
 		{
-			while (true)
+			while (!quit)
 			{
 				var tl = new TcpListener(IPAddress.Any, 12345);
 				tl.Start();

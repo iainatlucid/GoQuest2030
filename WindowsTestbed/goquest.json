@@ -1,8 +1,12 @@
 {
+	"userpanels": [
+		{
+			"Ipid": 129,
+			"Subpage": 0
+		}
+	],
 	"teams": {
-		"list": [
-			
-		]
+		"list": []
 	},
 	"gameversions": {
 		"list": [

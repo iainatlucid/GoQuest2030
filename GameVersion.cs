@@ -1,45 +1,79 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Threading;
 
 namespace Lucid.GoQuest
 {
-	internal enum State { EMPTY, PLAYING }
 	//Production
-	internal partial class GameVersion : Base 
+	internal enum GameState
 	{
+		EMPTY,
+		OFFERED,
+		CONFIRMED,
+		PLAYING,
+		OCCUPIED,
+		EXITING,
+		DISABLED
+	}
+	internal partial class GameVersion : Base
+	{
+		[JsonProperty] internal byte Score { get; set; }
+		[JsonProperty] internal ushort TimeAllowed { get; set; }
+		[JsonProperty] internal GameState State { get; set; }
+		[JsonIgnore] internal Team Team { get; set; }
+		[JsonIgnore] internal bool LastPlayFailed { get; set; }
+		internal GameVersion() { }
+		internal GameVersion(GameVersion g) { }
 		internal void AddDelegates(GamesInterface gif)
 		{
-			gif.GameStarts.Add(name, gameStart);
-			gif.SuperQuests.Add(name, superQuest);
-			gif.GameNames.Add(name, gameName);
+			gif.GameStarts.Add(Name, gameStart);
+			gif.SuperQuests.Add(Name, superQuest);
+			gif.GameNames.Add(Name, gameName);
 		}
 		private void gameStart()
 		{
-			StdOut.WriteLine("GAME STARTED for {0}", name);
+			StdOut.WriteLine("GAME STARTED for {0}", Name);
 		}
 		private void superQuest()
 		{
-			StdOut.WriteLine("SUPERQUEST called for {0}", name);
+			StdOut.WriteLine("SUPERQUEST called for {0}", Name);
 		}
 		private void gameName()
 		{
+		}
+		public void SetOnline()
+		{
+			/*
+			Reset();
+			panel.SetPage(GamePanel.SubpageJoin.FrontPage, true);
+			fusionio.GameEnabled(true);
+			*/
+		}
+		public void SetOffline()
+		{
+			/*
+			Reset();
+			state = GameState.DISABLED;
+			panel.SetPage(GamePanel.SubpageJoin.OutOfService, true);
+			fusionio.GameEnabled(false);
+			*/
 		}
 	}
 	//Test
 	internal partial class GameVersion : Base
 	{
-		public override string ToString() { return String.Format("{0}:{1}", name, State); }
+		public override string ToString() { return String.Format("{0}:{1}", Name, State); }
 		private TimerCallback gameOver { get; set; }
-		internal volatile State State = State.EMPTY;
+		internal volatile GameState PlayState = GameState.EMPTY;
 		private string currentTeam;
-		internal void Claim() { State = State.PLAYING; }
+		internal void Claim() { PlayState = GameState.PLAYING; }
 		internal void Play(Team team, int handicap, TimerCallback callback)
 		{
 			gameOver = callback;
-			//Console.WriteLine(">>>>>>>>>>{0} started playing {1}...", team, name);
-			Thread.Sleep(1000);	//playing...
-			//Console.WriteLine("---------------{0} finished {1}, played {2}.", team, name, team.Played);
-			State = State.EMPTY;
+			//Console.WriteLine(">>>>>>>>>>{0} started playing {1}...", team, Name);
+			Thread.Sleep(1000); //playing...
+			//Console.WriteLine("---------------{0} finished {1}, played {2}.", team, Name, team.Played);
+			PlayState = GameState.EMPTY;
 			gameOver(null);
 		}
 	}

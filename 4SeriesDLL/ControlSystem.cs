@@ -62,6 +62,7 @@ namespace Lucid.GoQuest
 				StdOut.WriteStr = CrestronConsole.PrintLine;
 				StdOut.WriteFmt = CrestronConsole.PrintLine;
 				GoQuest.Path = "/user/goquest/";
+				GoQuest.Initialise(this);
 				GoQuest.Print();
 				AutoPlayer.Start();
 			}
@@ -117,14 +118,11 @@ namespace Lucid.GoQuest
 					//The program has been resumed. Resume all the user threads/timers as needed.
 					break;
 				case (eProgramStatusEventType.Stopping):
-					//The program has been stopped.
-					//Close all threads. 
-					//Shutdown all Client/Servers in the system.
-					//General cleanup.
-					//Unsubscribe to all System Monitor events
+					StdOut.WriteLine("ControlSystem stopping...");
+					GoQuest.Stop();
+					StdOut.WriteLine("ControlSystem stopped.");
 					break;
 			}
-
 		}
 
 		/// <summary>

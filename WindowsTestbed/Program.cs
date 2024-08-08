@@ -17,6 +17,7 @@ namespace Lucid.GoQuest
 			StdOut.WriteStr = Console.WriteLine;
 			StdOut.WriteFmt = Console.WriteLine;
 			GoQuest.Path = Directory.GetCurrentDirectory() + @"\..\..\..\";
+			GoQuest.Initialise(null);
 			GoQuest.Print();
 			//AutoPlayer.Start();
 			Application.EnableVisualStyles();

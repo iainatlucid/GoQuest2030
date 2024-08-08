@@ -1,4 +1,4 @@
-#if false
+//#if false
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Crestron.SimplSharpPro.UI;
@@ -47,15 +47,14 @@ namespace Lucid.GoQuest
 
 		[JsonIgnore]
 		public ControlSystem CtrlSys { get { return ctrlsys; } set { ctrlsys = value; } }
-
-		public void Initialise(ControlSystem ctrlsys, GoQuest gq)
+		public void Initialise(object ctrlsys, GoQuest gq)
 		{
 			host = gq;
 			if (ipid == 0)
 				return;
 
 			//enteredPin = new List<byte>();
-			panel = new XpanelForSmartGraphics(ipid, ctrlsys);
+			panel = new XpanelForSmartGraphics(ipid, (ControlSystem)ctrlsys);
 			panel.BaseEvent += new BaseEventHandler(panel_BaseEvent);
 			//panel.ButtonStateChange += new ButtonEventHandler(panel_ButtonStateChange);
 			panel.SigChange += new SigEventHandler(panel_SigChange);
@@ -133,7 +132,7 @@ namespace Lucid.GoQuest
 			protected GoQuest host;
 			protected MainPageJoin main;
 			protected SubpageJoin sub;
-			protected Timer timeout;//'
+			protected Timer timeout;
 			protected object userdata;
 
 			public UserControlPanel Outer { get { return outer; } set { outer = value; } }
@@ -150,12 +149,12 @@ namespace Lucid.GoQuest
 			{
 				if (timeout != null)
 				{
-					timeout.Change(0, Timeout.Infinite);//'
+					timeout.Change(10000, Timeout.Infinite);
 					StdOut.WriteLine("{0} timeout RESET", this.GetType().Name);
 				}
 				else
 				{
-					timeout = new Timer(TimedOut, null, 10000, Timeout.Infinite);//'
+					timeout = new Timer(TimedOut, null, 10000, Timeout.Infinite);
 					StdOut.WriteLine("{0} timeout START", this.GetType().Name);
 				}
 			}
@@ -163,7 +162,7 @@ namespace Lucid.GoQuest
 			{
 				if (timeout != null)
 				{
-					timeout.Dispose();//'
+					timeout.Dispose();
 					StdOut.WriteLine("{0} timeout STOPPED", this.GetType().Name);
 				}
 			}
@@ -283,14 +282,14 @@ namespace Lucid.GoQuest
 						switch (sigNum)
 						{
 							case (ushort)Buttons.DeleteAllTeams:
-								hold = new CTimer(Held, Buttons.DeleteAllTeams, GoQuest.Instance.ButtonHoldTime);
+								hold = new Timer(Held, Buttons.DeleteAllTeams, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 								break;
 								/*
 								case (ushort)Buttons.Function3:
-									hold = new CTimer(Held, Buttons.Function3, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Function3, GoQuest.Instance.ButtonHoldTime);
 									break;
 								case (ushort)Buttons.Function4:
-									hold = new CTimer(Held, Buttons.Function4, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Function4, GoQuest.Instance.ButtonHoldTime);
 									break;
 								*/
 						}
@@ -308,10 +307,10 @@ namespace Lucid.GoQuest
 		}
 		private class EditPage : Page
 		{
-			protected CTimer flash;
+			protected Timer flash;
 			protected byte flashField = 0;
 			protected bool held = false;
-			protected CTimer hold;
+			protected Timer hold;
 			protected void FlashOff(object mask)
 			{
 				flashField &= (byte)((~((int)mask)) & 0xFF);
@@ -357,7 +356,7 @@ namespace Lucid.GoQuest
 			{
 				held = true;
 				outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "OK";
-				new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+				new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite); //todo
 			}
 			public override void Init(object o)
 			{
@@ -370,7 +369,7 @@ namespace Lucid.GoQuest
 				origTeam = (Team)userdata;
 				newTeam = new Team(origTeam);
 				DisplayTeam(newTeam);
-				flash = new CTimer(Flash, 250);
+				flash = new Timer(Flash, null, 0, 250);
 			}
 			private void DisplayTeam(Team team)
 			{
@@ -410,20 +409,20 @@ namespace Lucid.GoQuest
 									break;
 								case (ushort)Buttons.Add:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (newTeam.Name == string.Empty || newTeam.PinCode == 0)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Team name or PIN empty";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										flashField |= (1 << 0);
 										flashField |= (1 << 1);
-										new CTimer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod);
-										new CTimer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod);
+										new Timer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+										new Timer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (GoQuest.TeamNameNotExists(newTeam.Name, null))
 									{
@@ -440,38 +439,38 @@ namespace Lucid.GoQuest
 										{
 											flashField |= (1 << 1);
 											outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "PIN exists";
-											new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
-											new CTimer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod);
+											new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+											new Timer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										}
 									}
 									else
 									{
 										flashField |= (1 << 0);
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Team name exists";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
-										new CTimer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+										new Timer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									break;
 								case (ushort)Buttons.Reset:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else
 									{
 										newTeam.Game = null;
 										GoQuest.ModifyTeam(origTeam, newTeam);
-										GoQuest.WriteConsole(10, GoQuest.AllowError.EICTransition, "{0} RESET by USER: EditTeam", newTeam.Name);
+										StdOut.WriteLine("{0} RESET by USER: EditTeam", newTeam.Name);
 										outer.SetPage(SubpageJoin.None, false, null);
 									}
 									/*
 									if (GoQuest.AssignRandomPin(newTeam) == 0)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Cannot generate PIN";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
 										flashField |= (1 << 1);
 									}
 									outer.panel.StringInput[(ushort)Text.Pin].StringValue = newTeam.PinCode == 0 ? "ERR" : newTeam.PinCode.ToString();
@@ -496,20 +495,20 @@ namespace Lucid.GoQuest
 									break;
 								case (ushort)Buttons.Modify:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (newTeam.Name == string.Empty || newTeam.PinCode == 0)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Team name or PIN empty";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										flashField |= (1 << 0);
 										flashField |= (1 << 1);
-										new CTimer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod);
-										new CTimer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod);
+										new Timer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+										new Timer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (GoQuest.TeamNameNotExists(newTeam.Name, origTeam))
 									{
@@ -525,31 +524,31 @@ namespace Lucid.GoQuest
 										{
 											flashField |= (1 << 1);
 											outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "PIN exists";
-											new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
-											new CTimer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod);
+											new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+											new Timer(FlashOff, (1 << 1), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										}
 									}
 									else
 									{
 										flashField |= (1 << 0);
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Team name exists";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
-										new CTimer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
+										new Timer(FlashOff, (1 << 0), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									break;
 								case (ushort)Buttons.Delete:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										return;
 									}
 									if (!GoQuest.DeleteTeam(origTeam))
 									{
 										outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Ensure GameOver & check Games.";
-										new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										return;
 									}
 									outer.SetPage(SubpageJoin.None, false, null);
@@ -562,16 +561,16 @@ namespace Lucid.GoQuest
 							switch (sigNum)
 							{
 								case (ushort)Buttons.Add:
-									hold = new CTimer(Held, Buttons.Add, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Add, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Reset:
-									hold = new CTimer(Held, Buttons.Reset, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Reset, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Modify:
-									hold = new CTimer(Held, Buttons.Modify, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Modify, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Delete:
-									hold = new CTimer(Held, Buttons.Delete, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Delete, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 							}
 						}
@@ -600,7 +599,7 @@ namespace Lucid.GoQuest
 										= string.Format("Approved pin {0} to {1}"
 											, (int)(Math.Pow(10, GoQuest.Instance.PinLength - 1) + 0.5)
 											, (int)(Math.Pow(10, GoQuest.Instance.PinLength) - 1 + 0.5));
-									new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+									new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 								}
 								break;
 							case (ushort)Text.Start:
@@ -615,7 +614,7 @@ namespace Lucid.GoQuest
 								{
 									flashField |= (1 << 2);
 									outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Colon delimited time";
-									new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+									new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 								}
 								break;
 							case (ushort)Text.Remain:
@@ -639,7 +638,7 @@ namespace Lucid.GoQuest
 								{
 									flashField |= (1 << 3);
 									outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Colon delimited time";
-									new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+									new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 								}
 								break;
 							case (ushort)Text.Score:
@@ -653,7 +652,7 @@ namespace Lucid.GoQuest
 								{
 									flashField |= (1 << 4);
 									outer.panel.StringInput[(ushort)Text.EditTeamDetails].StringValue = "Score 0 or greater";
-									new CTimer(SetEditTeamDetails, GoQuest.Instance.TempFlashPeriod);
+									new Timer(SetEditTeamDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 								}
 								break;
 						}
@@ -678,7 +677,7 @@ namespace Lucid.GoQuest
 					outer.panel.BooleanInput[(ushort)Buttons.RemainVisibility].BoolValue = ((flashField & (1 << 3)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.RemainVisibility].BoolValue;
 				if (((flashField & (1 << 4)) != 0))
 					outer.panel.BooleanInput[(ushort)Buttons.ScoreVisibility].BoolValue = ((flashField & (1 << 4)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.ScoreVisibility].BoolValue;
-				flash.Reset(250);
+				flash.Change(250, Timeout.Infinite);
 			}
 		}
 		private class ScoreCard : Page
@@ -781,7 +780,7 @@ namespace Lucid.GoQuest
 			{
 				held = true;
 				outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "OK";
-				new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+				new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 			}
 			public override void Init(object o)
 			{
@@ -794,7 +793,7 @@ namespace Lucid.GoQuest
 				origGame = (GameVersion)userdata;
 				newGame = new GameVersion(origGame);
 				DisplayGame(newGame);
-				flash = new CTimer(Flash, 250);
+				flash = new Timer(Flash, null, 250, Timeout.Infinite);
 			}
 			private void DisplayGame(GameVersion game)
 			{
@@ -833,11 +832,11 @@ namespace Lucid.GoQuest
 									break;
 								case (ushort)Buttons.Enable:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else
 									{
@@ -853,40 +852,40 @@ namespace Lucid.GoQuest
 									break;
 								case (ushort)Buttons.Reset:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else
 									{
 										GoQuest.ResetGame(origGame);
-										GoQuest.WriteConsole(10, GoQuest.AllowError.EICTransition, "{0} RESET by USER: EditGame", origGame.Name);
+										StdOut.WriteLine("{0} RESET by USER: EditGame", origGame.Name);
 										outer.SetPage(SubpageJoin.None, false, null);
 									}
 									break;
 								case (ushort)Buttons.Modify:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (newGame.Team != null)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Team still playing game!";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										flashField |= (1 << 2);
-										new CTimer(FlashOff, (1 << 2), GoQuest.Instance.TempFlashPeriod);
+										new Timer(FlashOff, (1 << 2), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (newGame.Score == 0)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Game may not score 0";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 										flashField |= (1 << 2);
-										new CTimer(FlashOff, (1 << 2), GoQuest.Instance.TempFlashPeriod);
+										new Timer(FlashOff, (1 << 2), GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else if (flashField == 0)
 									{
@@ -896,11 +895,11 @@ namespace Lucid.GoQuest
 									break;
 								case (ushort)Buttons.Disable:
 									if (hold != null)
-										hold.Stop();
+										hold.Dispose();
 									if (!held)
 									{
 										outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = "Hold button down until OK";
-										new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+										new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);//todo
 									}
 									else
 									{
@@ -916,16 +915,16 @@ namespace Lucid.GoQuest
 							switch (sigNum)
 							{
 								case (ushort)Buttons.Enable:
-									hold = new CTimer(Held, Buttons.Enable, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Enable, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Modify:
-									hold = new CTimer(Held, Buttons.Modify, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Modify, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Disable:
-									hold = new CTimer(Held, Buttons.Disable, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Disable, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 								case (ushort)Buttons.Reset:
-									hold = new CTimer(Held, Buttons.Reset, GoQuest.Instance.ButtonHoldTime);
+									hold = new Timer(Held, Buttons.Reset, GoQuest.Instance.ButtonHoldTime, Timeout.Infinite);
 									break;
 							}
 						}
@@ -944,7 +943,7 @@ namespace Lucid.GoQuest
 								{
 									flashField |= (1 << 2);
 									outer.panel.StringInput[(ushort)Text.EditGameDetails].StringValue = string.Format("Number must be 0 - 255");
-									new CTimer(SetEditGameDetails, GoQuest.Instance.TempFlashPeriod);
+									new Timer(SetEditGameDetails, null, GoQuest.Instance.TempFlashPeriod, Timeout.Infinite);
 								}
 								break;
 						}
@@ -967,7 +966,7 @@ namespace Lucid.GoQuest
 					outer.panel.BooleanInput[(ushort)Buttons.PointsVisibility].BoolValue = ((flashField & (1 << 2)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.PointsVisibility].BoolValue;
 				if (((flashField & (1 << 3)) != 0))
 					outer.panel.BooleanInput[(ushort)Buttons.SecondsVisibility].BoolValue = ((flashField & (1 << 3)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.SecondsVisibility].BoolValue;
-				flash.Reset(250);
+				flash.Change(250,Timeout.Infinite);
 			}
 		}
 		public enum SubpageJoin : ushort
@@ -1006,7 +1005,7 @@ namespace Lucid.GoQuest
 				panel.SmartObjects[1].UShortInput["Set Number of Items"].UShortValue = (ushort)host.teams.Count;
 				panel.SmartObjects[2].UShortInput["Set Number of Items"].UShortValue = (ushort)host.gameversions.Count;
 
-				lock (GoQuest.objectsync)
+				lock (GoQuest.Instance.teams) //todo
 				{
 					for (uint i = 0; i < N; i++)
 					{
@@ -1025,23 +1024,23 @@ namespace Lucid.GoQuest
 						soushortcache1.SetUShort(i * 4 + 1 + 10, (ushort)(host.teams[(int)i].JustFailed > 0 ? 4 : i < 3 ? i + 1 : 0), 0);
 					}
 				}
-				lock (GoQuest.objectsync)
+				lock (GoQuest.Instance.gameversions) //todo
 				{
 					for (uint i = 0; i < M; i++)
 					{
 						sostringcache2.SetString(i * 10 + 1 + 10, host.gameversions[(int)i].ID.ToString());
 						sostringcache2.SetString(i * 10 + 2 + 10, host.gameversions[(int)i].Name);
 						sostringcache2.SetString(i * 10 + 3 + 10,
-							host.gameversions[(int)i].State == uk.co.lucidpartnership.goquest.GameVersion.GameState.DISABLED ?
+							host.gameversions[(int)i].State == GameState.DISABLED ?
 							"-DISABLED-" : host.gameversions[(int)i].Team != null ? host.gameversions[(int)i].Team.Name : "-----");
 						sostringcache2.SetString(i * 10 + 4 + 10, host.gameversions[(int)i].Score.ToString());
 						sostringcache2.SetString(i * 10 + 5 + 10, host.gameversions[(int)i].TimeAllowed.ToString());
 						soushortcache2.SetUShort(i * 5 + 1 + 10,
-							host.gameversions[(int)i].State == uk.co.lucidpartnership.goquest.GameVersion.GameState.DISABLED ?
+							host.gameversions[(int)i].State == GameState.DISABLED ?
 								(ushort)0 :
-								host.gameversions[(int)i].State != uk.co.lucidpartnership.goquest.GameVersion.GameState.PLAYING && host.gameversions[(int)i].LastPlayFailed ?
+								host.gameversions[(int)i].State != GameState.PLAYING && host.gameversions[(int)i].LastPlayFailed ?
 									(ushort)3 :
-									host.gameversions[(int)i].State == uk.co.lucidpartnership.goquest.GameVersion.GameState.PLAYING ?
+									host.gameversions[(int)i].State == GameState.PLAYING ?
 										(ushort)1 :
 										(ushort)2, 0);
 
@@ -1058,11 +1057,11 @@ namespace Lucid.GoQuest
 		{
 			if (page != null)
 				page.StopTimeout();
-			CType pagetype;
+			Type pagetype;
 			subpagetypes.TryGetValue(j, out pagetype);
 			if (pagetype != null)
 			{
-				page = (Page)Crestron.SimplSharp.Reflection.Activator.CreateInstance(pagetype);
+				page = (Page)Activator.CreateInstance(pagetype);
 				page.Outer = this;
 				page.Host = host;
 				page.Init(userdata);
@@ -1070,9 +1069,9 @@ namespace Lucid.GoQuest
 				page.Update();
 				Subpage = j;
 				if (serialise)
-					GoQuest.Instance.serialise("UserControlPanel.SetPage", j.ToString());
+					GoQuest.Instance.serialise();
 			}
 		}
 	}
 }
-#endif
+//#endif

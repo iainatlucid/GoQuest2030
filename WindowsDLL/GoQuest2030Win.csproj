@@ -65,6 +65,7 @@
     <Compile Include="..\Team.cs">
       <Link>Team.cs</Link>
     </Compile>
+    <Compile Include="CrestronDummies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
