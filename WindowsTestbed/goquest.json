@@ -1,10 +1,12 @@
 {
-	"userpanels": [
-		{
-			"Ipid": 129,
-			"Subpage": 0
-		}
-	],
+	"userpanels": {
+		"list": [
+			{
+				"Ipid": 129,
+				"Subpage": 0
+			}
+		]
+	},
 	"teams": {
 		"list": []
 	},
