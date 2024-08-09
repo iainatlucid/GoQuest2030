@@ -380,7 +380,7 @@ namespace Lucid.GoQuest
 				outer.panel.StringInput[(ushort)Text.Start].StringValue = team.StartTime.Year == 9999 ?
 					"--:--" : team.StartTime.ToString("HH:mm:ss");
 				outer.panel.StringInput[(ushort)Text.Remain].StringValue = team.RemainingShortTimeString(false);
-				outer.panel.StringInput[(ushort)Text.Challenges].StringValue = String.Format("{0}/{1}", team.GamesWon.Count.ToString(), team.GamesTried.Count.ToString());
+				outer.panel.StringInput[(ushort)Text.Challenges].StringValue = String.Format("{0}", /*team.GamesWon.Count.ToString(),*/ team.GamesTried.Count.ToString());
 				outer.panel.StringInput[(ushort)Text.Score].StringValue = team.Score.ToString();
 			}
 			private void SetEditTeamDetails(object o)
@@ -430,7 +430,7 @@ namespace Lucid.GoQuest
 										{
 											if (flashField == 0)
 											{
-												newTeam.GamesWon = new List<string>();
+												//newTeam.GamesWon = new List<string>();
 												GoQuest.AddTeam(newTeam);
 												outer.SetPage(SubpageJoin.None, false, null);
 											}
@@ -662,7 +662,7 @@ namespace Lucid.GoQuest
 			public override void Update()
 			{
 				outer.panel.StringInput[(ushort)Text.TeamStatus].StringValue = newTeam.PlayStatus.ToString();
-				outer.panel.StringInput[(ushort)Text.Challenges].StringValue = String.Format("{0}/{1}", newTeam.GamesWon.Count.ToString(), newTeam.GamesTried.Count.ToString());
+				outer.panel.StringInput[(ushort)Text.Challenges].StringValue = String.Format("{0}", /*newTeam.GamesWon.Count.ToString(),*/ newTeam.GamesTried.Count.ToString());
 				//outer.panel.StringInput[(ushort)Text.Score].StringValue = newTeam.Score.ToString();
 			}
 			private void Flash(object o)
@@ -709,7 +709,7 @@ namespace Lucid.GoQuest
 				outer.panel.StringInput[(ushort)Text.TeamName].StringValue = team.Name;
 				outer.panel.StringInput[(ushort)Text.Date].StringValue = DateTime.Now.ToLongDateString();
 				outer.panel.StringInput[(ushort)Text.Points].StringValue = team.Score.ToString();
-				outer.panel.StringInput[(ushort)Text.Won].StringValue = String.Format("{0}", team.GamesWon.Count.ToString());
+				//outer.panel.StringInput[(ushort)Text.Won].StringValue = String.Format("{0}", team.GamesWon.Count.ToString());
 				outer.panel.StringInput[(ushort)Text.Tried].StringValue = String.Format("{0}", team.GamesTried.Count.ToString());
 			}
 			public override void Signal(ushort smartID, ushort sigNum, Sig sig)
@@ -966,7 +966,7 @@ namespace Lucid.GoQuest
 					outer.panel.BooleanInput[(ushort)Buttons.PointsVisibility].BoolValue = ((flashField & (1 << 2)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.PointsVisibility].BoolValue;
 				if (((flashField & (1 << 3)) != 0))
 					outer.panel.BooleanInput[(ushort)Buttons.SecondsVisibility].BoolValue = ((flashField & (1 << 3)) == 0) || !outer.panel.BooleanInput[(ushort)Buttons.SecondsVisibility].BoolValue;
-				flash.Change(250,Timeout.Infinite);
+				flash.Change(250, Timeout.Infinite);
 			}
 		}
 		public enum SubpageJoin : ushort

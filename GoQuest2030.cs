@@ -53,7 +53,7 @@ namespace Lucid.GoQuest
 	}
 	public class GoQuest
 	{
-		private static readonly byte MAJOR_REV = 0, MINOR_REV = 0, RELEASE_REV = 1;
+		private static readonly byte MAJOR_REV = 2, MINOR_REV = 0, RELEASE_REV = 1;
 		private static readonly string REV_SUFFIX = "";
 		private static GoQuest instance = null;
 		private GamesInterface gif = new GamesInterface();
@@ -64,8 +64,8 @@ namespace Lucid.GoQuest
 		internal ushort PinLength { get; set; } = 3; //todo
 		[JsonProperty] internal SafeList<Team> teams;
 		[JsonProperty] internal SafeGameVersionsList gameversions;
+		[JsonProperty] private SafeList<UserControlPanel> userpanels;
 		[JsonIgnore] public static string Path { get; set; }
-		[JsonProperty] private List<UserControlPanel> userpanels;
 		[JsonIgnore] public static GoQuest Instance { get { return instance == null ? instance = deserialise() : instance; } }
 		[JsonIgnore] public static ushort cpuload;
 		private GoQuest() { }
@@ -98,8 +98,7 @@ namespace Lucid.GoQuest
 		}
 		public static void Initialise(object arg)
 		{
-			foreach (var p in Instance.userpanels)
-				p.Initialise(arg, Instance);
+			Instance.userpanels.ForEach((p) => p.Initialise(arg, Instance));
 		}
 		public static void Stop()
 		{
@@ -119,7 +118,7 @@ namespace Lucid.GoQuest
 		}
 		internal static void AddTeam(Team team)
 		{
-			Instance.teams.Add(team);
+			//Instance.teams.Add(team);
 			/*
 			lock (objectsync)
 			{
@@ -131,7 +130,10 @@ namespace Lucid.GoQuest
 		}
 		public static bool AddTeam(string name)
 		{
-			bool ret = true;// instance.teams.TryAdd(new Team(name, 0));
+			bool ret = instance.teams.TryAdd(new Team(name, 0));
+			Instance.userpanels.ForEach((p) => p.Update());
+			//instance.serialise();
+			return ret;
 			/*
 			lock (objectsync)
 			{
@@ -145,8 +147,6 @@ namespace Lucid.GoQuest
 				return true;
 			}
 			*/
-			instance.serialise();
-			return ret;
 		}
 		internal static void ModifyTeam(Team orgTeam, Team newTeam)
 		{
