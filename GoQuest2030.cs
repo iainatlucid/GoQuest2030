@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace Lucid.GoQuest
 {
@@ -23,22 +24,56 @@ namespace Lucid.GoQuest
 		internal SafeList() { list = new List<T>(); }
 		internal void Add(T elem) { lock (this) list.Add(elem); }
 		internal bool TryAdd(T elem) { lock (this) { if (list.Contains(elem)) return false; Add(elem); return true; } }
+		internal void Clear() { lock (this) list.Clear(); }
+		internal bool TryClear(Func<T, bool> pred)
+		{
+			var del = new List<T>();
+			lock (this)
+			{
+				foreach (var l in list)
+					if (pred(l))
+						del.Add(l);
+				foreach (var d in del)
+					list.Remove(d);
+				return list.Count == 0;
+			}
+		}
 		internal bool Contains(T elem) { lock (this) return list.Contains(elem); }
 		internal bool Remove(T elem) { lock (this) return list.Remove(elem); }
 		internal void ForEach(Action<T> act) { lock (this) foreach (var t in list) act(t); }
+		internal bool ForEach_ReturnOnSuccess(Func<T, bool> func) { lock (this) foreach (var l in list) if (func(l)) return true; return false; }
 		internal bool Any(Func<T, bool> pred) { lock (this) { return Where(pred).Count() > 0; } }
 		internal IEnumerable<T> Where(Func<T, bool> pred) { lock (this) return list.Where(pred); }
 		internal T FirstOrDefault(Func<T, bool> pred) { lock (this) return list.Where(pred).FirstOrDefault(); }
+		internal IEnumerable<T> Intersect(IEnumerable<T> set) { lock (this) lock (set) return list.Intersect(set); }
+		internal void InsertionSort(Comparison<T> comparison)
+		{
+			lock (this)
+			{
+				int count = list.Count;
+				for (int j = 1; j < count; j++)
+				{
+					T key = list[j];
+
+					int i = j - 1;
+					for (; i >= 0 && comparison(list[i], key) > 0; i--)
+					{
+						list[i + 1] = list[i];
+					}
+					list[i + 1] = key;
+				}
+			}
+		}
 		internal void print() { lock (this) foreach (var v in list) StdOut.WriteLine(v.ToString()); }
 	}
 	internal class SafeGameVersionsList : SafeList<GameVersion>
 	{
-		internal GameVersion ClaimFirstEmpty(List<GameVersion> played)
+		internal GameVersion ClaimFirstEmpty(SafeList<GameVersion> played)
 		{
 			lock (list)
 			{
 				var empties = Where(x => x.PlayState == GameState.EMPTY).ToList();
-				var intersect = empties.Intersect(played);
+				var intersect = played.Intersect(empties);
 				empties.RemoveAll(x => intersect.Contains(x));
 				if (empties.Any()) { empties.First().Claim(); return empties.First(); }
 				return null;
@@ -57,17 +92,21 @@ namespace Lucid.GoQuest
 		private static readonly string REV_SUFFIX = "";
 		private static GoQuest instance = null;
 		private GamesInterface gif = new GamesInterface();
+		private Thread gameloop;
+		private bool quit;
 		internal static bool cleaning;
 		internal ushort ButtonHoldTime { get; set; } = 1000;    //todo
 		internal ushort TempFlashPeriod { get; set; } = 500; //todo
 		internal ushort DefaultTeamMins { get; set; } = 75; //todo
 		internal ushort PinLength { get; set; } = 3; //todo
+		[JsonProperty] private SafeList<ushort> teampins;
 		[JsonProperty] internal SafeList<Team> teams;
 		[JsonProperty] internal SafeGameVersionsList gameversions;
 		[JsonProperty] private SafeList<UserControlPanel> userpanels;
+		[JsonIgnore] public static bool Autoplay { get; set; }
 		[JsonIgnore] public static string Path { get; set; }
 		[JsonIgnore] public static GoQuest Instance { get { return instance == null ? instance = deserialise() : instance; } }
-		[JsonIgnore] public static ushort cpuload;
+		[JsonIgnore] public static volatile ushort cpuload;
 		private GoQuest() { }
 		private GoQuest detokenise()
 		{
@@ -96,9 +135,36 @@ namespace Lucid.GoQuest
 				file.Write(s);
 			detokenise();
 		}
-		public static void Initialise(object arg)
+		public static void Start(object arg)
 		{
 			Instance.userpanels.ForEach((p) => p.Initialise(arg, Instance));
+			Instance.gameloop = new Thread(Instance.run);
+			Instance.gameloop.Start();
+			//Instance.sql = new SQL(SqlServerStr, SqlDatabase, SqlLogTo);
+		}
+
+		private void run()
+		{
+			uint c = 0;
+			while (!quit)
+			{
+				try
+				{
+					Instance.teams.ForEach((t) => t.CheckPlay());
+					if (c % 4 == 0) Instance.teams.InsertionSort(Team.Compare);
+					Instance.userpanels.ForEach((p) => p.Update());
+				}
+				catch (Exception e)
+				{
+					StdOut.WriteLine(">>> EXCEPTION: GoQuest2030.run: \r\n{0}", e.StackTrace);
+				}
+				c = c < uint.MaxValue ? c + 1 : 0;
+#if !DEBUG
+				//watchdog.Reset(WatchdogDelay);
+#endif
+				Thread.Sleep(250);
+			}
+			StdOut.WriteLine("Game loop stopped.");
 		}
 		public static void Stop()
 		{
@@ -118,74 +184,98 @@ namespace Lucid.GoQuest
 		}
 		internal static void AddTeam(Team team)
 		{
-			//Instance.teams.Add(team);
+			if (Autoplay) team.Autoplay();
+			Instance.teams.Add(team);
+			Instance.serialise();
 			/*
 			lock (objectsync)
 			{
-				instance.teams.Add(team);
+				Instance.teams.Add(team);
 				sql.AddTeam(team);
-				instance.serialise("GoQuest.AddTeam", team.Name);
+				Instance.serialise("GoQuest.AddTeam", team.Name);
 			}
 			*/
 		}
 		public static bool AddTeam(string name)
 		{
-			bool ret = instance.teams.TryAdd(new Team(name, 0));
-			Instance.userpanels.ForEach((p) => p.Update());
-			//instance.serialise();
+			var team = new Team(name);
+			if (Autoplay) team.Autoplay();
+			var ret = Instance.teams.TryAdd(team);
+			Instance.serialise();
 			return ret;
 			/*
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t.Name.Equals(name))
 						return false;
 				var team = new Team(name);
-				instance.teams.Add(team);
+				Instance.teams.Add(team);
 				sql.AddTeam(team);
-				instance.serialise("GoQuest.AddTeam", name);
+				Instance.serialise("GoQuest.AddTeam", name);
 				return true;
 			}
 			*/
 		}
 		internal static void ModifyTeam(Team orgTeam, Team newTeam)
 		{
-			/*
-			lock (objectsync)
-			{
-				foreach (var t in instance.teams)
+			Instance.teams.ForEach
+			(
+				(t) =>
+				{
 					if (t == orgTeam)
-					{
 						t.Modify(newTeam);
-						sql.ModifyTeam(t);
-						instance.serialise("GoQuest.ModifyTeam", t.Name);
-					}
-			}
-			*/
+				}
+			);
+			Instance.serialise();
+			/*
+						lock (objectsync)
+						{
+							foreach (var t in Instance.teams)
+								if (t == orgTeam)
+								{
+									t.Modify(newTeam);
+									sql.ModifyTeam(t);
+									Instance.serialise("GoQuest.ModifyTeam", t.Name);
+								}
+						}
+						*/
 		}
 		internal static bool DeleteTeam(Team team)
 		{
+			return Instance.teams.ForEach_ReturnOnSuccess
+			(
+				(t) =>
+				{
+					if (t == team && t.PlayStatus != TeamStatus.Playing && t.Game == null)
+					{
+						Instance.teams.Remove(t);
+						return true;
+					}
+					return false;
+				}
+			);
 			/*
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t == team && t.PlayStatus != TeamStatus.Playing && t.Game == null)
 					{
-						instance.teams.Remove(t);
-						instance.serialise("GoQuest.DeleteTeam", t.Name);
+						Instance.teams.Remove(t);
+						Instance.serialise("GoQuest.DeleteTeam", t.Name);
 						return true;
 					}
 			}
-			*/
 			return false;
+			*/
 		}
 		public static void ToggleCleaning()
 		{
-			if (instance.teams.Any((t) => { return t.PlayStatus == TeamStatus.Playing || t.PlayStatus == TeamStatus.Waiting; })) return;
+			if (Instance.teams.Any((t) => { return t.PlayStatus == TeamStatus.Playing || t.PlayStatus == TeamStatus.Waiting; })) return;
 			/*
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t.PlayStatus == TeamStatus.Playing || t.PlayStatus == TeamStatus.Waiting)
 						return;
 			}
@@ -194,27 +284,28 @@ namespace Lucid.GoQuest
 		}
 		public static void TryDeleteAllTeams()
 		{
+			Instance.teams.TryClear((t) => { return t.PlayStatus != TeamStatus.Playing && t.Game == null; });
 			/*
 			var del = new List<Team>();
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t.PlayStatus != TeamStatus.Playing && t.Game == null)
 						del.Add(t);
 				foreach (var t in del)
-					instance.teams.Remove(t);
-				instance.serialise("GoQuest.TryDeleteAllTeams", string.Empty);
+					Instance.teams.Remove(t);
+				Instance.serialise("GoQuest.TryDeleteAllTeams", string.Empty);
 			}
 			*/
 		}
 		internal static bool TeamNameNotExists(string name, Team exception)
 		{
 			/*
-			if ((instance == null) || name.Equals(String.Empty))
+			if ((Instance == null) || name.Equals(String.Empty))
 				return false;
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t != exception && t.Name.Equals(name))
 						return false;
 			*/
@@ -224,11 +315,11 @@ namespace Lucid.GoQuest
 		internal static Team GetTeamByPin(short pin, Team exception)
 		{
 			/*
-			if (instance == null || pin == 0)
+			if (Instance == null || pin == 0)
 				return null;
 			lock (objectsync)
 			{
-				foreach (var t in instance.teams)
+				foreach (var t in Instance.teams)
 					if (t != exception && t.PinCode == pin)
 						return t;
 			*/
@@ -237,27 +328,27 @@ namespace Lucid.GoQuest
 		}
 		public static bool CheckApprovedPins(ushort pin)
 		{
+			return Instance.teampins.ForEach_ReturnOnSuccess((p) => { return p == pin; });
 			/*
 			lock (objectsync)
 			{
-				foreach (var p in instance.teampins)
+				foreach (var p in Instance.teampins)
 					if (p == pin)
 						return true;
 			}
 			*/
-			return false;
 		}
 		internal static void ModifyGame(GameVersion orgGame, GameVersion newGame)
 		{
 			/*
 			lock (objectsync)
 			{
-				foreach (var g in instance.gameversions)
+				foreach (var g in Instance.gameversions)
 					if (g == orgGame)
 					{
 						g.Modify(newGame);
 						sql.AddGameVersion(g);
-						instance.serialise("GoQuest.ModifyGame", g.Name);
+						Instance.serialise("GoQuest.ModifyGame", g.Name);
 					}
 			}
 			*/
@@ -267,13 +358,13 @@ namespace Lucid.GoQuest
 			/*
 			lock (objectsync)
 			{
-				foreach (var g in instance.gameversions)
+				foreach (var g in Instance.gameversions)
 					if (g == gv)
 					{
 						g.Reset();
 						break;
 					}
-				instance.serialise("GoQuest.ResetGame", gv.Name);
+				Instance.serialise("GoQuest.ResetGame", gv.Name);
 			}
 			*/
 		}

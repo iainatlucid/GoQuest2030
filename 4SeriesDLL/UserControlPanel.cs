@@ -85,7 +85,7 @@ namespace Lucid.GoQuest
 				return;
 			try
 			{
-				StdOut.WriteLine("SO {0} Button {1} is {2}", args.SmartObjectArgs.ID, args.Sig.Number, args.Sig.BoolValue);
+				//StdOut.WriteLine("SO {0} Button {1} is {2}", args.SmartObjectArgs.ID, args.Sig.Number, args.Sig.BoolValue);
 				page.Signal((ushort)args.SmartObjectArgs.ID, (ushort)args.Sig.Number, args.Sig);
 			}
 			catch (InvalidCastException e)
@@ -150,12 +150,12 @@ namespace Lucid.GoQuest
 				if (timeout != null)
 				{
 					timeout.Change(10000, Timeout.Infinite);
-					StdOut.WriteLine("{0} timeout RESET", this.GetType().Name);
+					//StdOut.WriteLine("{0} timeout RESET", this.GetType().Name);
 				}
 				else
 				{
 					timeout = new Timer(TimedOut, null, 10000, Timeout.Infinite);
-					StdOut.WriteLine("{0} timeout START", this.GetType().Name);
+					//StdOut.WriteLine("{0} timeout START", this.GetType().Name);
 				}
 			}
 			public void StopTimeout()
@@ -163,12 +163,12 @@ namespace Lucid.GoQuest
 				if (timeout != null)
 				{
 					timeout.Dispose();
-					StdOut.WriteLine("{0} timeout STOPPED", this.GetType().Name);
+					//StdOut.WriteLine("{0} timeout STOPPED", this.GetType().Name);
 				}
 			}
 			protected virtual void TimedOut(object o)
 			{
-				StdOut.WriteLine("{0} TIMED OUT", this.GetType().Name);
+				//StdOut.WriteLine("{0} TIMED OUT", this.GetType().Name);
 			}
 			public void Show()
 			{
@@ -202,12 +202,12 @@ namespace Lucid.GoQuest
 			private void Held(object o)
 			{
 				held = true;
-				StdOut.WriteLine("{0} is held", ((Buttons)o).ToString());
+				//StdOut.WriteLine("{0} is held", ((Buttons)o).ToString());
 				outer.panel.BooleanInput[(ushort)(Buttons)o].BoolValue = true;
 			}
 			public override void Signal(ushort smartID, ushort sigNum, Sig sig)
 			{
-				StdOut.WriteLine("smartID={0},join={1},val={2}", smartID, sigNum, sig.BoolValue);
+				//StdOut.WriteLine("smartID={0},join={1},val={2}", smartID, sigNum, sig.BoolValue);
 				if (smartID > 0)
 				{
 					const int firstJoin = 4011;
@@ -223,7 +223,7 @@ namespace Lucid.GoQuest
 									return;
 								try
 								{
-									StdOut.WriteLine("Team {0}", host.teams[sigNum - firstJoin].Name);
+									//StdOut.WriteLine("Team {0}", host.teams[sigNum - firstJoin].Name);
 									outer.SetPage(SubpageJoin.EditTeam, false, host.teams[sigNum - firstJoin]); //crash - out of range
 								}
 								catch (Exception e) { StdOut.WriteLine(">>> EXCEPTION: UserControlPanel.NoSubpage.Signal - team: \r\n{0}", e.StackTrace); }
@@ -233,7 +233,7 @@ namespace Lucid.GoQuest
 									return;
 								try
 								{
-									StdOut.WriteLine("Game {0}", host.gameversions[(sigNum - firstJoin) / 10].Name);
+									//StdOut.WriteLine("Game {0}", host.gameversions[(sigNum - firstJoin) / 10].Name);
 									outer.SetPage(SubpageJoin.EditGame, false, host.gameversions[(sigNum - firstJoin) / 10]);   //crash - out of range //this list in VTPRo has different incs
 								}
 								catch (Exception e) { StdOut.WriteLine(">>> EXCEPTION: UserControlPanel.NoSubpage.Signal - team: \r\n{0}", e.StackTrace); }
@@ -463,7 +463,7 @@ namespace Lucid.GoQuest
 									{
 										newTeam.Game = null;
 										GoQuest.ModifyTeam(origTeam, newTeam);
-										StdOut.WriteLine("{0} RESET by USER: EditTeam", newTeam.Name);
+										//StdOut.WriteLine("{0} RESET by USER: EditTeam", newTeam.Name);
 										outer.SetPage(SubpageJoin.None, false, null);
 									}
 									/*
@@ -861,7 +861,7 @@ namespace Lucid.GoQuest
 									else
 									{
 										GoQuest.ResetGame(origGame);
-										StdOut.WriteLine("{0} RESET by USER: EditGame", origGame.Name);
+										//StdOut.WriteLine("{0} RESET by USER: EditGame", origGame.Name);
 										outer.SetPage(SubpageJoin.None, false, null);
 									}
 									break;

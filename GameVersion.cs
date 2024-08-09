@@ -63,18 +63,16 @@ namespace Lucid.GoQuest
 	internal partial class GameVersion : Base
 	{
 		public override string ToString() { return String.Format("{0}:{1}", Name, State); }
-		private TimerCallback gameOver { get; set; }
 		internal volatile GameState PlayState = GameState.EMPTY;
-		private string currentTeam;
 		internal void Claim() { PlayState = GameState.PLAYING; }
-		internal void Play(Team team, int handicap, TimerCallback callback)
+		internal void Play(Team team)
 		{
-			gameOver = callback;
-			//Console.WriteLine(">>>>>>>>>>{0} started playing {1}...", team, Name);
+			Team = team;
+			Console.WriteLine("'{0}' started playing {1}...", team.Name, Name);
 			Thread.Sleep(1000); //playing...
-			//Console.WriteLine("---------------{0} finished {1}, played {2}.", team, Name, team.Played);
-			PlayState = GameState.EMPTY;
-			gameOver(null);
+			Console.WriteLine("'{0}' FINISHED {1}, played {2}.", team.Name, Name, team.GamesTried.Count + 1); ;
+			Team = null;
+			PlayState = GameState.EMPTY;	
 		}
 	}
 }

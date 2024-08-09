@@ -92,7 +92,7 @@ namespace Lucid.GoQuest
 				json.GameStart(gameNames[j]);
 				json.SuperQuest(gameNames[j]);
 				json.GameName(gameNames[j++]);
-				//json.Release(); json.Release(); json.Release();
+				json.Release(); json.Release(); json.Release();
 				if (j == gameNames.Count) j = 0;
 				Thread.Sleep(100);
 			}

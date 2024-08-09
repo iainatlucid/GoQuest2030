@@ -16,26 +16,106 @@ namespace Lucid.GoQuest
 		Archived,
 		Unknown,
 	}
-	internal partial class Team : Base
+	internal partial class Team
 	{
-		private ushort pinCode;
-		private TeamStatus status = TeamStatus.Unknown;
-		private List<GameVersion> gamesPlayed = new List<GameVersion>();
-		private DateTime startTime = DateTime.MaxValue, endTime = DateTime.MaxValue;
-		private List<string> /*gamesWon,*/ gamesTried;
+		//SQL VARS
+		private int id;
+		private string name;
 		private ushort score;
-		[JsonIgnore] internal TeamStatus PlayStatus { get { return status; } set { status = value; } }
-		[JsonIgnore] internal ushort PinCode { get { return pinCode; } set { pinCode = value; } }
-		[JsonIgnore] internal DateTime StartTime { get { return startTime; } set { startTime = value; } }
-		[JsonIgnore] internal DateTime EndTime { get { return endTime; } set { endTime = value; } }
-		//[JsonIgnore] internal List<string> GamesWon { get { return gamesWon; } set { gamesWon = value; } }
-		[JsonIgnore] internal List<string> GamesTried { get { return gamesTried; } set { gamesTried = value; } }
-		[JsonIgnore] internal ushort Score { get { return score; } set { score = value; } }
-		[JsonIgnore] internal GameVersion Game;
-		[JsonIgnore] public byte JustFailed { get; set; }
+		private DateTime startTime = DateTime.MaxValue, endTime = DateTime.MaxValue;
+		//END SQL
+		private ushort pinCode;
+		private SafeList<GameVersion> gamesWon, gamesTried;
+		private TeamStatus status = TeamStatus.Unknown;
+		private byte avgAge, totalMembers;
 
-		internal Team(Team t) { gamesTried = new List<string>(); }
-		internal Team(string n, int i) : this() { Name = n; ID = i; }
+		private static Random pinGenerator;
+
+		//SQL VARS
+		public int ID { get { return id; } set { id = value; } }
+		public string Name { get { return name; } set { name = value; } }
+		public ushort Score { get { return score; } set { score = value; } }
+		public DateTime StartTime { get { return startTime; } set { startTime = value; } }
+		public DateTime EndTime { get { return endTime; } set { endTime = value; } }
+		//END SQL
+		public byte AvgAge { get { return avgAge; } set { avgAge = value; } }
+		public byte TotalMembers { get { return totalMembers; } set { totalMembers = value; } }
+		public ushort PinCode { get { return pinCode; } set { pinCode = value; } }
+		public SafeList<GameVersion> GamesWon { get { return gamesWon; } set { gamesWon = value; } }
+		public SafeList<GameVersion> GamesTried { get { return gamesTried; } set { gamesTried = value; } }
+		public TeamStatus PlayStatus { get { return status; } set { status = value; } }
+		[JsonIgnore]
+		public GameVersion Game;
+		[JsonIgnore]
+		public byte JustFailed { get; set; }
+
+		public Team()
+		{
+			gamesWon = new SafeList<GameVersion>();
+			gamesTried = new SafeList<GameVersion>();
+			init_test();
+		}
+		public Team(string name)
+		{
+			Reset();
+			PinCode = 0;
+			Name = name;
+			PlayStatus = TestStatus();
+		}
+		public Team(Team t)
+		{
+			name = t.name;
+			avgAge = t.avgAge;
+			totalMembers = t.totalMembers;
+			score = t.score;
+			startTime = t.startTime;
+			endTime = t.endTime;
+			pinCode = t.pinCode;
+			gamesWon = t.gamesWon;
+			gamesTried = t.gamesTried;
+			status = t.status;
+			Game = t.Game;
+		}
+		public void Modify(Team t)
+		{
+			name = t.name;
+			avgAge = t.avgAge;
+			totalMembers = t.totalMembers;
+			score = t.score;
+			startTime = t.startTime;
+			endTime = t.endTime;
+			pinCode = t.pinCode;
+			gamesWon = t.gamesWon;
+			gamesTried = t.gamesTried;
+			status = t.status;
+			Game = t.Game;
+		}
+		public ushort AssignRandomPin()
+		{
+			if (pinGenerator == null)
+				pinGenerator = new Random((int)DateTime.Now.Ticks);
+			return (this.pinCode = (ushort)pinGenerator.Next
+				((int)(Math.Pow(10, GoQuest.Instance.PinLength - 1) + 0.5),
+					(int)(Math.Pow(10, GoQuest.Instance.PinLength) - 1 + 0.5)));
+		}
+		public void StartNow(short secs)
+		{
+			startTime = DateTime.Now;
+			endTime = new DateTime(startTime.Ticks + TimeSpan.TicksPerSecond * secs);
+		}
+		public void Extend(short secs)
+		{
+			endTime = new DateTime(endTime.Ticks + secs * TimeSpan.TicksPerSecond);
+		}
+		public void Shift(short secs)
+		{
+			endTime = new DateTime(endTime.Ticks + secs * TimeSpan.TicksPerSecond);
+			startTime = new DateTime(startTime.Ticks + secs * TimeSpan.TicksPerSecond);
+		}
+		public long RemainingSecs()
+		{
+			return (endTime - DateTime.Now).Ticks / TimeSpan.TicksPerSecond;
+		}
 		public string RemainingShortTimeString(bool secs)
 		{
 			TimeSpan remain;
@@ -52,18 +132,34 @@ namespace Lucid.GoQuest
 				default:
 					return "--:--";
 			}
+			/*
+			TimeSpan remain;
+			if (startTime > DateTime.Now)
+			{
+				if (endTime > DateTime.Now)
+				{
+					remain=new TimeSpan((endTime-startTime).Ticks);
+					return startTime == endTime ? "--:--" : string.Format("{0:0}:{1:00}:{2:00}", remain.Hours, remain.Minutes, remain.Seconds);
+				}
+
+			}
+			 */
+			/*
+			var ticks = (endTime - DateTime.Now).Ticks;
+			var remain = new TimeSpan(ticks);
+
+			return
+				ticks > 0 ?
+					status == TeamStatus.Playing ?
+						string.Format("{0:0}:{1:00}:{2:00}", remain.Hours, remain.Minutes, remain.Seconds)
+						: "--:--"
+				: "00:00";
+		*/
 		}
-		public void Reset()
+		public ushort RemainingPer16Bit()
 		{
-			score = 0;
-			Game = null;
-
-			StdOut.WriteLine("{0} Reset", Name);
-
-			startTime = DateTime.MaxValue;
-			endTime = DateTime.MaxValue;
-			//gamesWon = new List<string>();
-			gamesTried = new List<string>();
+			//TODO: This wraps on the TeamConfirm gauge when it goes negative upon GAME_OVER
+			return (ushort)(endTime == startTime ? 0 : DateTime.Now > endTime ? 0 : ((endTime - DateTime.Now).Ticks * 65535 / (endTime - startTime).Ticks));
 		}
 		public TeamStatus TestStatus()
 		{
@@ -83,16 +179,49 @@ namespace Lucid.GoQuest
 				return TeamStatus.Unknown;
 			}
 		}
+		public void CheckPlay()
+		{
+			var v = TestStatus();
+			if (v != status)
+			{
+				status = v;
+				StdOut.WriteLine("{0} {1}", name, status.ToString());
+				//GoQuest.Instance.Terminal.LastCmd = "list teams";
+				//GoQuest.Instance.serialise();
+			}
+		}
+		public void Reset()
+		{
+			score = 0;
+			Game = null;
+
+			//StdOut.WriteLine("{0} Reset", Name);
+
+			startTime = DateTime.MaxValue;
+			endTime = DateTime.MaxValue;
+			gamesWon = new SafeList<GameVersion>();
+			gamesTried = new SafeList<GameVersion>();
+		}
+
+		#region IComparable Members
+
+		public static int Compare(Team a, Team b)
+		{
+			return b.Score - a.Score;
+		}
+
+		#endregion
 	}
 	//Test
-	internal partial class Team : Base
+	internal partial class Team
 	{
 		private bool quit;
 		[JsonIgnore] public static int TeamsInPlay = 0;
-		internal Team() { TeamsInPlay++; Console.WriteLine("Teams in play: {0}", TeamsInPlay); }
+		private void init_test() { TeamsInPlay++; StdOut.WriteLine("Teams in play: {0}", TeamsInPlay); }
 		[JsonIgnore] public Thread autoplay;
 		internal void Autoplay() { autoplay = new Thread(play); autoplay.Start(); }
 		[JsonIgnore] internal Action<string> StartGame { get; set; }
+		internal Team(string n, int i) : this() { Name = n; ID = i; }
 		public void Stop()
 		{
 			StdOut.WriteLine("Team {0} stopping...", Name);
@@ -102,19 +231,19 @@ namespace Lucid.GoQuest
 		{
 			if (quit) { StdOut.WriteLine("Team {0} stopped.", Name); return; }
 			GameVersion g;
-			if ((g = GoQuest.Instance.gameversions.ClaimFirstEmpty(gamesPlayed)) != null)
+			if ((g = GoQuest.Instance.gameversions.ClaimFirstEmpty(gamesTried)) != null)
 			{
-				//StartGame(g.ID);
-				gamesPlayed.Add(g);
-				g.Play(this, ID, play);
+				g.Play(this);
+				gamesTried.Add(g);
 			}
-			else if (gamesPlayed.Count == GoQuest.Instance.gameversions.Count)
-				Console.WriteLine("****************************Team {0} FINISHED, teams in play={1}", Name, --TeamsInPlay);
+			else if (gamesTried.Count == GoQuest.Instance.gameversions.Count)
+			{
+				Console.WriteLine("********************** Team '{0}' FINISHED", Name);
+				gamesTried.Clear();
+			}
 			else
-			{
 				Thread.Sleep(100);
-				play(o);
-			}
+			play(o);
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace Lucid.GoQuest
 {
 	public class ControlSystem : CrestronControlSystem
 	{
-		bool dupe;
+		bool cpuDupe;
 		/// <summary>
 		/// ControlSystem Constructor. Starting point for the SIMPL#Pro program.
 		/// Use the constructor to:
@@ -58,13 +58,24 @@ namespace Lucid.GoQuest
 		{
 			try
 			{
-				SystemMonitor.CPUStatisticChange += new CPUStatisticChangeEventHandler((args) => { dupe = !dupe; if (dupe) CrestronConsole.PrintLine("\n\t\t\t\t\t\tCPU:{0}\n", args.Utilization); });
-				StdOut.WriteStr = CrestronConsole.PrintLine;
-				StdOut.WriteFmt = CrestronConsole.PrintLine;
+				SystemMonitor.CPUStatisticChange += new CPUStatisticChangeEventHandler
+				(
+					(args) =>
+					{
+						cpuDupe = !cpuDupe;
+						if (cpuDupe)
+						{
+							GoQuest.cpuload = args.Utilization;
+							//CrestronConsole.PrintLine("\n\t\t\t\t\t\tCPU:{0}\n", args.Utilization);
+						}
+					}
+				);
+				StdOut.WriteStr = Console.WriteLine;
+				StdOut.WriteFmt = Console.WriteLine;
 				GoQuest.Path = "/user/goquest/";
-				GoQuest.Initialise(this);
+				GoQuest.Start(this);
 				GoQuest.Print();
-				AutoPlayer.Start();
+				GoQuest.Autoplay = true	;
 			}
 			catch (Exception e)
 			{

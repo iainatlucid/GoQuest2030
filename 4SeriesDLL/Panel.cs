@@ -19,13 +19,13 @@ namespace Lucid.GoQuest
 			cache.TryGetValue(key, out val);
 			if (val == null)
 			{
-				StdOut.WriteLine("Adding {0},{1}", key, s);
+				//StdOut.WriteLine("Adding {0},{1}", key, s);
 				dsic[key].StringValue = s;
 				cache.Add(key, s);
 			}
 			else if (!s.Equals(val))
 			{
-				StdOut.WriteLine("Failed equality for {0} ({1}={2})", key, s, val);
+				//StdOut.WriteLine("Failed equality for {0} ({1}={2})", key, s, val);
 				dsic[key].StringValue = s;
 				cache[key] = s;
 			}
@@ -47,14 +47,14 @@ namespace Lucid.GoQuest
 			cache.TryGetValue(key, out val);
 			if (val == null)
 			{
-				StdOut.WriteLine("Adding {0},{1}", key, u);
+				//StdOut.WriteLine("Adding {0},{1}", key, u);
 				duic[key].UShortValue = u;
 				cache.Add(key, u);
 			}
 			else if ((u > val && ((u - val) > range)) || (u < val && ((val - u) > range)))
 			{
 
-				StdOut.WriteLine("Failed range for {0} ({1}={2})", key, u, val);
+				//StdOut.WriteLine("Failed range for {0} ({1}={2})", key, u, val);
 				duic[key].UShortValue = u;
 				cache[key] = u;
 			}
@@ -75,13 +75,13 @@ namespace Lucid.GoQuest
 			cache.TryGetValue(key, out val);
 			if (val == null)
 			{
-				StdOut.WriteLine("Adding {0},{1}", key, b);
+				//StdOut.WriteLine("Adding {0},{1}", key, b);
 				dbic[key].BoolValue = b;
 				cache.Add(key, b);
 			}
 			else if (!b.Equals(val))
 			{
-				StdOut.WriteLine("Failed equality for {0} ({1}={2})", key, b, val);
+				//StdOut.WriteLine("Failed equality for {0} ({1}={2})", key, b, val);
 				dbic[key].BoolValue = b;
 				cache[key] = b;
 			}

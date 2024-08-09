@@ -2,6 +2,7 @@
 
 namespace Lucid.GoQuest
 {
+	/*
 	public static class AutoPlayer
 	{
 		private static TeamSequencer seq;
@@ -23,15 +24,10 @@ namespace Lucid.GoQuest
 			while (!Quit)
 			{
 				if (Team.TeamsInPlay == 0)
-					for (int i = 1; i <= TEAMS; i++)
-					{
-						var t = new Team(i.ToString(), i);
-						t.Autoplay();
-						GoQuest.AddTeam(t);
-						if (i % 10 == 0) Thread.Sleep(1000);
-					}
+					GoQuest.Instance.teams.ForEach((t) => t.Autoplay());
 				Thread.Sleep(500);
 			}
 		}
 	}
+	*/
 }
